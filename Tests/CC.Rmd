@@ -1,0 +1,53 @@
+---
+title: "CC - Test"
+author: "Jean Pierre Decrorps"
+date: "31 août 2017"
+output:
+  pdf_document: default
+  html_document: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## R Markdown
+
+```{r echo=FALSE, message=FALSE}
+library(EpiStats)
+library(knitr)
+```
+
+
+```{r}
+data(Tiramisu)
+DF <- Tiramisu
+#kable(str(DF))
+```
+
+\newpage
+## CC ill - tira
+
+```{r}
+ret <- CC(DF, "ill", "tira", exact = FALSE)
+ret
+```
+```{r results='asis', warning=FALSE}
+kable(ret$df1, align=ret$df1.align)
+kable(ret$df2, digits=ret$df2.digits)
+```
+
+\newpage
+## CC ill - beer
+
+```{r results='asis'}
+result <- CC(DF, ill, beer, exact = TRUE)
+kable(result$df1, align=result$df1.align)
+kable(result$df2, digits=result$df2.digits)
+
+```
+
+```{r}
+#result$st
+```
+

@@ -1,0 +1,81 @@
+/* 
+  Third version of mygenerate.dlg
+  This version has a tab added for if/in
+*/  
+
+VERSION 9.0
+SYNCHRONOUS_ONLY
+
+POSITION . . 610 350
+
+DIALOG main, label("Shape to DTA transfert") tabtitle("Shp2dta")
+BEGIN
+
+  TEXT tx_using    10 20  260  .,	label("Shape file to transfert ...")
+  FILE fname_using 10 +20 460 ., error("Filename to open") label("Browse...") ///
+                                filter("Shape files|*.shp") ///
+								onchange("program using_onchange")
+
+  TEXT tx_data    10 +40  260  .,	label("Name of the generated data file...")
+  FILE fname_data 10 +20 460 ., error("Data Filename") label("Browse...") ///
+                                filter("Data files|*.dta") save ///
+								option(data)
+
+  TEXT tx_coor    10 +40  260  .,	label("Name of the generated coordinate file...")
+  FILE fname_coor 10 +20 460 ., error("Coord Filename") label("Browse...") ///
+                                filter("Data files|*.dta") save ///
+								option(coor)
+
+  CHECKBOX ck_id   10  +40   260  .,  label("Generate ID variable ")     ///
+		                        option(genid)                    
+
+  CHECKBOX ck_genc   10  +40   260  .,  label("Generate C variable for centroides ")     ///
+		                        option(genc)                    
+								
+END
+
+
+OK ok1,      label("OK")
+CANCEL can1, label("Cancel")
+SUBMIT sub1, label("Submit")
+HELP hlp1,   view("help shp2dta")
+RESET res1
+COPY copy1
+
+PROGRAM using_onchange
+BEGIN 
+
+    put "global emap_file = "
+	put `"""'
+    put main.fname_using 
+	put `"""'
+    stata hidden
+	put `"global emap_file : subinstr global emap_file ".shp" "", all"'
+	stata hidden
+	call main.fname_data.setvalue global emap_file 
+	call main.fname_data.append "-d"
+    call main.fname_coor.setvalue global emap_file 
+	call main.fname_coor.append "-c"
+	
+END
+
+PROGRAM command
+BEGIN   
+    put "shp2dta using "
+	put `"""'
+    put main.fname_using 
+	put `"""'
+	beginoptions
+		optionarg /quoted main.fname_data 
+		optionarg /quoted main.fname_coor 
+
+        if main.ck_id {
+		   put " genid(id)"
+		}
+        if main.ck_genc {
+		   put " genc(c)"
+		}
+		put " replace"
+	endoptions
+	
+END

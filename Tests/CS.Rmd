@@ -1,0 +1,50 @@
+---
+title: "CS - Test"
+author: "Jean Pierre Decrorps"
+date: "31 août 2017"
+output:
+  pdf_document: default
+  html_document: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## R Markdown
+
+```{r echo=FALSE, message=FALSE}
+library(EpiStats)
+library(knitr)
+```
+
+
+
+```{r}
+data(Tiramisu)
+DF <- Tiramisu
+#kable(str(DF))
+```
+
+
+\newpage
+## CS ill - mousse
+
+```{r}
+CS(DF, "ill", "mousse", exact = FALSE)
+
+```
+
+\newpage
+## CS ill - beer
+
+```{r results='asis'}
+result <- CS(DF, "ill", "beer", exact = TRUE)
+kable(result$DF1)
+kable(result$DF2)
+```
+
+```{r}
+result$st
+```
+

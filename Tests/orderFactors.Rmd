@@ -1,0 +1,174 @@
+---
+title: "orderFactors"
+author: "Jean Pierre Decrorps"
+date: '`r Sys.Date()`'
+output:
+  pdf_document: default
+  html_document: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## orderFactors
+
+
+```{r echo=FALSE, message=FALSE}
+library(EpiStats)
+library(epifield)
+library(knitr)
+data(Tiramisu)
+
+```
+## Structure of Tiramisu data.frame
+
+-------------------
+```{r}
+str(Tiramisu)
+```
+
+ 
+-------------------
+
+**NB: in the examples above, results show only modified columns**
+
+
+\newpage
+## orderFactors ill with automatic labels from values
+
+----------------------------
+```{r}
+# Here we transform a single binary (0,1) variable to an ordered factor (1,0) 
+df <- orderFactors(Tiramisu, "ill", values = c(1,0))
+
+```
+```{r echo=FALSE}
+# Showing only modified columns
+str(df$ill)
+
+```
+```{r}
+# Same with an unquoted variable
+df <- orderFactors(Tiramisu, ill, values = c(1,0))
+```
+```{r echo=FALSE}
+# Showing only modified columns
+str(df$ill)
+```
+----------------------
+
+## orderFactors ill, tira, mousse with automatic labels from values
+
+------------------------
+```{r}
+# Here we transform 3 binary (0,1) variables to an ordered factor (1,0) 
+df <- orderFactors(Tiramisu, c("ill", "tira", "mousse") , values = c(1,0))
+```
+```{r echo=FALSE}
+# Showing only modified columns
+str(df[, c("ill", "tira", "mousse")])
+```
+```{r}
+# Same with an unquoted list of variables
+df <- orderFactors(Tiramisu, ill, tira, mousse , values = c(1,0))
+```
+```{r echo=FALSE}
+# Showing only modified columns
+str(df[, c("ill", "tira", "mousse")])
+```
+-----------------
+
+\newpage
+## orderFactors ill, tira, beer with YES/NO labels
+
+------------------
+```{r}
+df <- orderFactors(Tiramisu, ill, tira, beer, values = c(1,0), labels = c("YES", "NO"))
+```
+```{r echo=FALSE}
+# Showing only modified columns
+str(df[, c("ill", "tira", "beer")])
+```
+-------------------
+
+## orderFactors sex (males, females) M/F labels
+
+-------------------
+```{r}
+df <- orderFactors(Tiramisu, sex, values = c("males", "females"), labels = c("M", "F"))
+```
+```{r echo=FALSE}
+# Showing only modified columns
+str(df[, "sex"])
+```
+----------------------
+
+\newpage
+## orderFactors ill, tira, wmousse, dmouse, mousse by numerical index of columns
+
+----------------------
+```{r}
+df <- orderFactors(Tiramisu, c(1, 5, 7, 8, 9), values = c(1, 0), labels = c("Y", "N"))
+
+```
+```{r echo=FALSE}
+# Showing only modified columns
+str(df[, c("ill", "tira", "wmousse", "dmousse", "mousse")])
+```
+-----------------
+
+## orderFactors wmousse, dmouse, mousse by a range of numerical index of columns
+
+----------------------
+```{r}
+df <- orderFactors(Tiramisu, 7:9 , values = c(1, 0), labels = c("Y", "N"))
+
+```
+```{r echo=FALSE}
+# Showing only modified columns
+str(df[, 7:9])
+```
+-----------------
+
+## orderFactors ill, tira, wmousse, dmouse, mousse by mixed values and range of numerical index of columns
+
+----------------------
+```{r}
+df <- orderFactors(Tiramisu, c(1, 5, 7:9) , values = c(1, 0), labels = c("Y", "N"))
+
+```
+```{r echo=FALSE}
+# Showing only modified columns
+str(df[, c(1, 5, 7:9)])
+```
+-----------------
+
+\newpage
+## You can use pipe (%>%) too
+```{r}
+df <- Tiramisu %>% orderFactors("ill", values = c(1,0)) %>%
+  orderFactors(tira, values = c(1,0), labels = c("YES", "NO")) %>%
+   orderFactors(sex, values = c("males", "females"), labels = c("M", "F")) %>%
+  orderFactors(7:9, values = c(1,0), labels = c("YES", "NO")) %>%
+  orderFactors(c(11, 13:15), values = c(1,0), labels = c("YES", "NO")) %>%
+  orderFactors(mince, salmon, horseradish, chickenwin, values = c(1,0), labels = c("YES", "NO")) %>%
+  orderFactors(c("roastbeef", "pork"), values = c(1,0), labels = c("YES", "NO"))
+```
+```{r echo=FALSE}
+# Showing only modified columns
+str(df[, c(-2, -4, -6, -10, -12)])
+```
+
+\newpage
+## ... or more condensed
+```{r}
+df <- Tiramisu %>% 
+  orderFactors(c(1, 5, 7:9, 11, 13:21) , values = c(1,0), labels = c("YES", "NO")) %>%
+  orderFactors(sex, values = c("males", "females"), labels = c("M", "F"))
+```
+```{r echo=FALSE}
+# Showing only modified columns
+str(df[, c(-2, -4, -6, -10, -12)])
+```
+

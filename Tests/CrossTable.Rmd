@@ -1,0 +1,85 @@
+---
+title: "crossTable"
+author: "Jean Pierre Decrorps"
+date: '`r Sys.Date()`'
+output:
+  pdf_document: default
+  html_document: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# crossTable
+
+Creates a contingency table of 2 variables. Percentage are optionals by row or column. It can provides an optional statistic (fisher or chisquare).
+
+NB: rossTable provides a better view of results if data are ordered factors.
+
+```{r echo=FALSE, message=FALSE}
+library(EpiStats)
+library(knitr)
+```
+
+## Recoding some data to ordered factors
+```{r }
+data(Tiramisu)
+DF <- Tiramisu
+DF %<>%
+  orderFactors(c(1, 5, 7:9, 11, 13:21) , values = c(1,0), labels = c("YES", "NO")) %>%
+  orderFactors(sex, values = c("males", "females"), labels = c("Males", "Females"))
+
+```
+
+\newpage
+## crossTable ill - tira
+
+```{r}
+ret <- crossTable(DF, var1="ill", var2="tira")
+ret
+kable(ret, align="r")
+```
+
+
+## crossTable ill - sex with column percentage and chi2 stat
+```{r}
+ret <- crossTable(DF, "ill", "sex", "col", "chi2")
+ret
+kable(ret, align="r", caption = "% en colonne")
+
+```
+
+## CrossTable ill - sex with row percentage and Fisher stat
+NB: All variales are unquoted
+```{r}
+ret <- crossTable(DF, ill, sex, row)
+ret
+kable(ret, align="r", caption = "% en ligne")
+
+```
+
+\newpage
+## CrossTable ill - sex with column and row percentages and no stat
+NB: All variales are unquoted
+```{r}
+ret <- crossTable(DF, ill, sex, both)
+ret
+kable(ret, align="r", caption = "% rows and columns")
+
+```
+
+\newpage
+## CrossTable beer - sex with column and row percentages and Chi2 stat
+NB: All variales are unquoted
+```{r}
+ret <- crossTable(DF, beer, sex, both, chi2)
+ret
+kable(ret, align="r", caption = "% rows and columns")
+
+```
+
+```{r}
+ip <- as.data.frame(installed.packages())
+```
+

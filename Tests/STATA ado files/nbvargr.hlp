@@ -1,0 +1,54 @@
+
+.-
+help for ^nbvargr^
+.-
+
+Graph variable, poisson & negative binomial probabilities
+----------------------------------------------------------
+
+ ^nbvargr^ varname [if] [in] [, ^n^(integer) graph_options]
+ 
+
+Description
+-----------
+
+^nbvargr^ graphs the observed proportions along
+        with the poisson and negative binomial
+        probabilities for a count type variable.
+
+        The poisson probabilities are computed
+        using an estimate of the poisson mean.  
+        The negative binomial probabilities use 
+        the same mean and an estimate of the 
+        overdispersion parameter.
+
+
+Options
+-------
+      
+^n^ the number of discrete levels to be included.
+  The default value of n is 10.
+
+
+Note
+----
+
+nbvargr requires that nbprob and pprob be installed.
+
+
+Examples
+--------
+
+ . ^nbvargr days^
+ . ^nbvargr days, n(15)^
+ . ^nbvargr days, scheme(s2color) msymbol(i i i)^
+
+
+
+Author
+------
+
+      Philip B. Ender
+      UCLA Statistical Consulting
+      ender@@ucla.edu 
+

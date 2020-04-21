@@ -1,0 +1,600 @@
+/* 
+  Third version of mygenerate.dlg
+  This version has a tab added for if/in
+*/  
+
+VERSION 9.0
+SYNCHRONOUS_ONLY
+
+POSITION . . 610 350
+
+LIST clcolor
+  BEGIN
+	Blues          
+	Blues2         
+	BuGn          
+	BuPu          
+	GnBu          
+	Greens          
+	Greens2         
+	Greys          
+	Greys2         
+	Heat         
+	OrRd          
+	Oranges          
+	PuBu          
+	PuBuGn          
+	PuRd          
+	Purples          
+	Rainbow         
+	RdPu          
+	Reds          
+	Reds2         
+	Terrain         
+	Topological         
+	YlGn          
+	YlGnBu          
+	YlOrBr          
+	YlOrRd          
+	BrBG         
+	BuRd         
+	BuYlRd         
+	PRGn         
+	PiYG         
+	PuOr         
+	RdBu         
+	RdGy         
+	RdYlBu         
+	RdYlGn         
+	Spectral         
+	Accent          
+	Dark2          
+	Paired         
+	Pastel1          
+	Pastel2          
+	Set1          
+	Set2          
+	Set3         
+  END 
+  
+LIST shape
+BEGIN
+	O         
+	D         
+	T         
+	S         
+	+      
+	X
+	o         
+	d         
+	s         
+	t         
+	x
+	Oh        
+	Dh        
+	Th        
+	Sh        
+	oh        
+	dh        
+	th        
+	sh        
+	p         
+	i    
+END  
+
+
+LIST shape_lab
+BEGIN
+        circle      
+        diamond  
+        triangle 
+        square   
+        plus   
+        x        
+        smcircle    
+        smdiamond  
+        smsquare    
+        smtriangle 
+        smplus smx 
+        circle_hollow  
+        diamond_hollow 
+        triangle_hollow 
+        square_hollow   
+        smcircle_hollow   
+        smdiamond_hollow  
+        smtriangle_hollow 
+        smsquare_hollow   
+        point             
+        none           
+END
+
+
+
+LIST legorder
+   BEGIN
+       hilo
+	   lohi
+    END
+
+LIST legstyle
+   BEGIN
+       0
+	   1
+	   2
+	   3
+    END
+
+LIST legstyle_lab
+   BEGIN
+       No label
+	   Ordinal label
+	   Standard label
+	   Only upper/lower
+    END
+	
+	
+LIST clmethod
+   BEGIN
+       quantile 
+	   boxplot 
+	   eqint 
+	   stdev 
+	   kmeans 
+	   custom 
+	   unique
+    END
+
+LIST clmethod_lab
+   BEGIN
+       Quantiles 
+	   Boxplot 
+	   Equal intervals 
+	   Standard deviates 
+	   K-means 
+	   Custom (Breaks defined by user)
+	   Unique values
+    END
+
+
+SCRIPT PREINIT
+BEGIN
+	create STRING tmp
+	create ARRAY  tmpArray
+	create STRING shapename
+END
+
+
+DIALOG shp2dta, label("SMAP Mapping with Stata") tabtitle("Shape to DTA")
+BEGIN
+ 
+  TEXTBOX tb_general 10 20 600 60 , label("This first tab lets you transform a shape file, e.g. a geographical file which contains coordinates, into a Stata data file (dta). This will allow Stata to use those data to draw a map. Two files will be created. The first one contains the boundary regions which define the map. The second one contains administrative data and the geographical code of each region")
+  TEXT tx_using    10 +60  260  .,	label("Shape file to transfer...")
+  FILE fname_using 10 +20 560 ., error("Filename to open") label("Browse...") ///
+                                filter("Shape files|*.shp") ///
+								onchange("program using_onchange")
+/*
+  TEXT tx_data    10 +40  260  .,	label("Name of the generated data file...")
+  FILE fname_data 10 +20 460 ., error("Data Filename") label("Browse...") ///
+                                filter("Data files|*.dta") save ///
+								option(data)
+
+  TEXT tx_coor    10 +40  260  .,	label("Name of the generated coordinate file...")
+  FILE fname_coor 10 +20 460 ., error("Coord Filename") label("Browse...") ///
+                                filter("Data files|*.dta") save ///
+								option(coor)
+*/
+								
+  TEXT tx_coor    10 +30  260  .,	label("Name of the generated coordinate file...")
+  EDIT fname_coor 10 +20 560 ., error("Coord Filename") option(coor)
+
+  TEXT tx_data    10 +30  260  .,	label("Name of the generated data file...")
+  EDIT fname_data 10 +20 560 ., error("Data Filename") option(data)
+								
+
+  CHECKBOX ck_id   10  +30   260  .,  label("Generate ID variable")     ///
+		                        option(genid) default(1) onclickon(script onclickonid)                 
+
+  CHECKBOX ck_genc   10  +20   260  .,  label("Generate C variable for centroids ")     ///
+		                        option(genc) default(1)   
+		                        
+  BUTTON bt_transfert 10 +40 200 . , label("Run shape to dta transfer" ) 	///
+                                     onpush(program shp2dta_transfert)                                        
+								
+END
+
+SCRIPT onclickonid
+BEGIN
+    shp2dta.fname_data.disable
+    shp2dta.fname_coor.disable
+END
+
+PROGRAM using_onchange
+BEGIN 
+
+    put "global emap_file = "
+	put `"""'
+    put shp2dta.fname_using 
+	put `"""'
+    stata hiden
+	put `"global emap_file : subinstr global emap_file ".shp" "", all"'
+	stata hiden
+	call shapename.setvalue global emap_file 
+    
+    call shapename.withvalue shp2dta.fname_data.setvalue "@-d"
+    call shapename.withvalue shp2dta.fname_coor.setvalue "@-c"
+
+    /* 
+    put "global emap_file = "
+	put `"""'
+    put shp2dta.fname_using 
+	put `"""'
+    stata 
+	put `"global emap_file : subinstr global emap_file ".shp" "", all"'
+	stata 
+	call shp2dta.fname_data.setvalue global emap_file 
+	call shp2dta.fname_data.append "-d"
+    call shp2dta.fname_coor.setvalue global emap_file 
+	call shp2dta.fname_coor.append "-c"
+	*/
+END
+
+
+PROGRAM shp2dta_transfert
+BEGIN
+    call shp2dta.fname_data.enable
+    call shp2dta.fname_coor.enable
+    call program using_onchange
+    call main.fname_using.setvalue class shp2dta.fname_coor.value
+    call merge.fname_shpdata.setvalue class shp2dta.fname_data.value
+    
+    put "shp2dta using "
+	put `"""'
+    put shp2dta.fname_using 
+	put `"""'
+
+	beginoptions
+		optionarg /quoted shp2dta.fname_data 
+		optionarg /quoted shp2dta.fname_coor 
+
+        if shp2dta.ck_id {
+		   put " genid(id)"
+		}
+        if shp2dta.ck_genc {
+		   put " genc(c)"
+		}
+		put " replace"
+	endoptions
+	stata
+
+END
+
+
+
+DIALOG merge, tabtitle("Merge with data")
+BEGIN
+
+  TEXTBOX tb_general 10 20 600 60 , label("To draw a map, you often have to merge the map data file with your own data. The map data file contains a code for each geographical area, your datafile must contain the same code to link your data using this geographical code.")
+
+  TEXT tx_using    10 +60  260  .,	label("Name of data file with shape information...")
+  FILE fname_shpdata 10 +20 560 ., error("Filename to open") label("Browse...") ///
+                                filter("Shape files|*.dta") ///
+								onchange(.)
+
+  TEXT tx_data    10 +30  260  .,	label("Name of the file to analyse...")
+  FILE fname_data 10 +20 560 ., error("Data Filename") label("Browse...") ///
+                                filter("Data files|*.dta") ///
+								option(data)
+
+  BUTTON bt_load 30 +30 200 . , label("Load file to select common variable" ) 	///
+                                     onpush(program load_data)                                        
+								
+
+  TEXT tx_indicator    10 +30  260  .,	label("Variable with geographical code")
+  VARNAME vn_indicator    10 +20  260  .,	label("Variable :")
+
+		                        
+  BUTTON bt_merge 30 +40 200 . , label("Merge Shape and data") 	///
+                                     onpush(program merge_shp_data)                                        
+								
+END
+
+PROGRAM load_data
+BEGIN
+	put "use " 
+ 	put `"""'
+    put merge.fname_shpdata 
+	put `"""'
+	put ", clear"
+	stata hiden
+END
+
+PROGRAM merge_shp_data
+BEGIN
+
+	put "use " 
+ 	put `"""'
+    put merge.fname_shpdata 
+	put `"""'
+	put ", clear"
+	stata 
+    put "merge "
+    put merge.vn_indicator 
+    put " using "
+	put `"""'
+    put merge.fname_data 
+	put `"""'
+	put ", sort"
+	stata
+
+END
+
+
+DIALOG main, tabtitle("Map with Stata")
+BEGIN
+
+  TEXT tx_using    10 20  260  .,	label("Name of coordinate file ...")
+  FILE fname_using 10 +20 460 ., error("Filename to open") label("Browse...") ///
+                                filter("Data files|*.dta") 						
+							
+  TEXT tx_indicator    10 +30  260  .,	label("Variable to draw")
+  VARNAME vn_indicator    10 +20  260  .,	label("Variable to draw")
+
+  TEXT tx_id    280 -20  260  .,	label("ID Variable")
+  VARNAME vn_id    280 +20  260  .,	label("Variable to draw")  ///
+                                            default("id")    ///
+											option(id)
+
+  TEXT tx_title    10 +30  260  .,	label("Title")
+  EDIT  ed_title      10  +20  360  .,	error("title")  ///
+                                        option(title)
+  
+  TEXT tx_subtitle    10 +30  260  .,	label("Sub-title")
+  EDIT  ed_subtitle      10  +20 360  .,	error("subtitle") ///
+                                           option(subtitle)  
+										   
+  CHECKBOX ck_choro   10  +30   260  .,  label("Choropleth map")     ///
+		                        option(genid) default(1)                   
+										   
+  CHECKBOX ck_points   10  +30   260  .,  label("Points map")     ///
+		                        option(genid)                    
+								
+END
+
+DIALOG choro,  tabtitle("Choropleth")
+BEGIN
+
+   TEXT tx_title    10 30  260  .,	label("Choropleth method")
+   COMBOBOX cb_clmethod   10  +20   260  .,  label("Choropleth method")     ///
+                                values(clmethod)  default(Quantiles)         ///
+								contents(clmethod_lab)                          ///
+		                        option(clmethod)                            ///
+                                dropdown								
+  
+  TEXT tx_clnumber    10 +30  260  .,	label("Number of classes")
+  EDIT  ed_clnumber      10  +20  120  .,	error("clnumber") default(5) ///
+                                           option(clnumber)  
+
+  TEXT tx_clbreak    10 +30  260  .,	label("Custom classes")
+  EDIT  ed_clbreak      10  +20  120  .,	error("clbreak") ///
+                                           option(clbreak)  
+										   
+  TEXT tx_fcolor    10 +30  260  .,	label("Fill color of base map polygons")
+  COMBOBOX cb_fcolor   10  +20   260  .,  label("Color")     ///
+                                values(clcolor) default(Blues)              ///
+								contents(clcolor)                          ///
+		                        option(fcolor)                            ///
+                                dropdown								
+  
+END
+
+DIALOG points,  tabtitle("Points map")
+BEGIN
+
+  TEXT tx_data    10 20  360  .,	label("Name of points coordinate file ...")
+  FILE fname_data 10 +20 360 ., error("Filename to open") label("Browse...") ///
+                                filter("Data files|*.dta")                   ///
+                                option(data)								
+
+  BUTTON bt_points_coord  10 +30 150 ., label("Select coordinates variable")   ///
+                                  onpush(program show_points_coord) 
+
+  TEXT tx_xcoor        10 +30  260  .,	label("Variable for X coordinate of points")
+  EDIT vn_xcoor    10 +20  130  .,	label("") ///
+                                        option(xcoor)       
+
+  TEXT tx_ycoor        10 +30  260  .,	label("Variable for Y coordinate of points")
+  EDIT vn_ycoor    10 +20  130  .,	label("") ///
+										option(ycoor)																	
+
+   TEXT tx_shape    10 +30  260  .,	label("Shape of point markers")
+   COMBOBOX cb_shape   10  +20   130  .,  label("shape")     ///
+                                values(shape)                            ///
+								contents(shape_lab)                      ///
+		                        option(shape)                            ///
+                                dropdown								
+  										   
+  TEXT tx_mcolor    10 +30  260  .,	label("Color of markers")
+  COLOR cb_mcolor   10  +20  20   .,  label("Color")       			
+  
+END
+
+
+PROGRAM show_points_coord 
+BEGIN
+		if points.fname_data.isdefault()  {
+			stopbox note "Please, first select a coordinate file"
+		} 
+		else {
+           put "capture : preserve"
+           stata 
+           put "use "
+           put `"""'
+           put points.fname_data
+           put `"""'
+           put ",clear"
+           stata 
+           call create STRING spmapresult
+           call create STRING spmapresult2
+	       call create CHILD spmap_pc AS spchild
+		   call spchild.setExitString spmapresult
+	       call spchild.settitle "Specify coordinates"
+	       call spchild.setExitAction "program getspmapresult"
+		}
+END
+
+/*
+SCRIPT title_show_margin_dialog
+BEGIN
+	create CHILD gr_margin_create AS title_margin_dlg
+	title_margin_dlg.setExitString title_marginResult
+	title_margin_dlg.setExitAction "program title_checkMarginResult"
+END	
+PROGRAM title_checkMarginResult
+BEGIN
+	if title_marginResult {
+		call title_marginResult.tokenize tmpArray
+		call tmp.setvalue "Custom margin "
+		call tmp.append "(Left:"
+		call tmp.append class tmpArray[1]
+		call tmp.append " Right:"
+		call tmp.append class tmpArray[2]
+		call tmp.append " Bottom:"
+		call tmp.append class tmpArray[3]
+		call tmp.append " Top:"
+		call tmp.append class tmpArray[4]
+		call tmp.append ")"
+		call tmp.withvalue title.bu_margin.settooltip "@"
+	}
+	else {
+		call title.bu_margin.settooltip "Custom margin (not defined)"
+	}
+END
+
+
+*/
+
+
+PROGRAM getspmapresult
+BEGIN
+	put "restore"
+	stata 
+	call points.vn_xcoor.setvalue class spmapresult.value // class spchild.vn_xcoor2.value
+	call points.vn_ycoor.setvalue class spmapresult2.value // class spchild.vn_xcoor2.value
+END
+
+
+
+DIALOG legend,  tabtitle("Legends")
+BEGIN
+
+
+  CHECKBOX ck_legonoff   10  30   260  .,  label("Display legend")     ///
+		                        option(legend)   ///
+								default(1) 
+																
+  CHECKBOX ck_legcount   10  +30   260  .,  label("Display number of each class")     ///
+		                        option(legcount)   
+
+  TEXT tx_legorder    10 +30  260  .,	label("Legend order")
+  COMBOBOX cb_legorder   10  +20  80 .,  label("legorder")     ///
+                                values(legorder)                            ///
+								contents(legorder)                          ///
+		                        option(legorder)                            ///
+                                dropdown								
+								
+  TEXT tx_legtitle    10 +30  260  .,	label("Legend title")
+  EDIT  ed_legtitle      10  +20 220  .,	error("legtitle") ///
+                                           option(legtitle)  
+
+  TEXT tx_legstyle    10 +30  260  .,	label("Legend style")
+  COMBOBOX cb_legstyle   10  +20  140  .,  label("legstyle")     ///
+                                values(legstyle)                            ///
+								contents(legstyle_lab)                          ///
+		                        option(legstyle)                            ///
+                                dropdown								
+
+  TEXT tx_legsize    10 +30  260  .,	label("Legend size (from 0.5 to 3)")
+  EDIT  ed_legsize      10  +20  60  .,	error("legtitle") 
+								
+  
+END
+
+DIALOG label,  tabtitle("Labels")
+BEGIN
+
+
+  CHECKBOX ck_labelon   10  20   260  .,  label("Display labels")  		                       
+
+  TEXT tx_labelvar        10 +30  260  .,	label("Variable containing labels")
+  VARNAME vn_labelvar    10 +20  260  .,	label("") 
+											
+  TEXT tx_labelx        10 +30  260  .,	label("Variable for X coordinate of labels")
+  VARNAME vn_labelx    10 +20  260  .,	label("") 
+
+  TEXT tx_labely        10 +30  260  .,	label("Variable for Y coordinate of labels")
+  VARNAME vn_labely    10 +20  260  .,	label("") 
+											
+END
+
+
+
+OK ok1,      label("OK")
+CANCEL can1, label("Cancel")
+SUBMIT sub1, label("Submit")
+HELP hlp1,   view("help smap")
+RESET res1
+COPY copy1
+
+
+PROGRAM command
+BEGIN 
+    if main.fname_using.isdefault() {
+    	stopbox stop "You have to select a coordinates file"
+    	exit
+    }  
+    put "spmap " 
+	if main.ck_choro {
+		put main.vn_indicator " "
+    }
+	put "using "
+	put `"""'
+    put main.fname_using 
+	put `"""'
+	beginoptions
+        optionarg  main.vn_id 
+        optionarg /quoted main.ed_title 
+        optionarg /quoted main.ed_subtitle 
+		if main.ck_choro {
+			optionarg  choro.cb_clmethod
+			optionarg  choro.ed_clnumber
+			optionarg  choro.cb_fcolor
+			if choro.cb_clmethod.iseq("custom") {
+			   optionarg  choro.ed_clbreak
+			}
+			option legend.ck_legcount
+			optionarg legend.cb_legorder
+			optionarg legend.cb_legstyle
+			optionarg /quoted legend.ed_legtitle
+			if legend.ed_legsize {
+			   put "legend(symy(*" legend.ed_legsize ")"
+			   put " symx(*" legend.ed_legsize ")"
+			   put " size(*" legend.ed_legsize ") )"		   
+			}
+		}
+		if label.ck_labelon {
+		   put "label( xcoord(" label.vn_labelx ") ycoord(" label.vn_labely ///
+		       ") label(" label.vn_labelvar ") )"
+		
+		}
+		if main.ck_points {
+		   put "point("
+           optionarg /quoted points.fname_data
+		   optionarg points.vn_xcoor
+		   optionarg points.vn_ycoor
+		   put `"fcolor(""' points.cb_mcolor `"")"'
+		   optionarg points.cb_shape		   
+           put ")"		   
+		}
+	endoptions
+	
+END

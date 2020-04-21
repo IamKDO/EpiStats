@@ -1,0 +1,123 @@
+$OR.strata.wald
+        est     lower     upper
+1  1.454106 0.5709105  3.703602
+2 14.461538 2.9164597 71.708893
+
+$OR.strata.score
+        est     lower     upper
+1  1.454106 0.5801277  3.633845
+2 14.461538 3.2312981 64.657348
+
+$OR.strata.cfield
+        est     lower     upper
+1  1.454106 0.5670246  3.832393
+2 14.461538 2.6246786 82.067922
+
+$OR.strata.mle
+        est     lower      upper
+1  1.449283 0.5212265   4.218148
+2 13.953658 2.1201163 105.996800
+
+$OR.crude.wald
+       est    lower   upper
+1 6.757885 3.710273 12.3088
+
+$OR.crude.score
+       est    lower    upper
+1 6.757885 3.719728 12.26525
+
+$OR.crude.cfield
+       est    lower    upper
+1 6.757885 3.702072 12.38683
+
+$OR.crude.mle
+       est    lower    upper
+1 6.701059 3.565925 12.92707
+
+$OR.mh.wald
+      est    lower    upper
+1 2.25409 1.006111 5.050063
+
+$ARisk.strata.wald
+        est     lower    upper
+1  6.025641 -8.815589 20.86687
+2 21.446078  1.147601 41.74456
+
+$ARisk.strata.score
+        est     lower    upper
+1  6.025641 -9.352100 20.83962
+2 21.446078  7.147809 45.27897
+
+$ARisk.crude.wald
+       est    lower    upper
+1 44.09633 31.63526 56.55741
+
+$ARisk.crude.score
+       est    lower   upper
+1 44.09633 30.95177 55.5306
+
+$ARisk.mh.wald
+      est    lower    upper
+1 11.4705 -14.7162 37.65721
+
+$ARisk.mh.sato
+      est      lower    upper
+1 11.4705 -0.1950189 23.13603
+
+$ARisk.mh.green
+      est      lower   upper
+1 11.4705 -0.5105934 23.4516
+
+$PARisk.strata.wald
+       est      lower     upper
+1 2.797619 -10.260060 15.855298
+2 2.264493  -1.655297  6.184283
+
+$PARisk.strata.piri
+       est      lower    upper
+1 2.797619 -4.1153915 9.710630
+2 2.264493 -0.1083128 4.637298
+
+$PARisk.crude.wald
+       est    lower    upper
+1 11.14523 2.993681 19.29677
+
+$PARisk.crude.piri
+       est    lower    upper
+1 11.14523 7.261028 15.02943
+
+$AFest.strata.wald
+        est      lower     upper
+1 0.3100036 -0.9185516 0.7629291
+2 0.9283342  0.5283278 0.9905658
+
+$AFest.crude.wald
+        est      lower     upper
+1 0.3122924 -0.7237583 0.9845339
+2 0.9308511 -0.7237583 0.9845339
+
+$PAFest.strata.wald
+        est      lower     upper
+1 0.1508828 -0.2470518 0.4218364
+2 0.5319149 -0.1025620 0.8012777
+
+$PAFest.crude.wald
+        est lower     upper
+1 0.4171371     0 0.4748281
+
+$chisq.strata
+  test.statistic df      p.value
+1      0.6198139  1 4.311165e-01
+2     16.8156751  1 4.119165e-05
+
+$chisq.crude
+  test.statistic df      p.value
+1       43.97465  1 3.326561e-11
+
+$chisq.mh
+  test.statistic df    p.value
+1       3.773336  1 0.05207567
+
+$OR.homog
+  test.statistic df     p.value
+1       7.233378  1 0.007156043

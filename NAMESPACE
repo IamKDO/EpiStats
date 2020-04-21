@@ -1,0 +1,26 @@
+#exportPattern("^[[:alpha:]]+")
+
+export(
+  CS, cs,
+  CSTable, cstable,
+  CSInter, csinter,
+  CC, cc,
+  CCTable, cctable,
+  CCInter, ccinter,
+  crossTable,
+  orderFactors
+)
+
+
+import(epiR,
+       dplyr
+)
+
+importFrom("stats", "chisq.test", "fisher.test")
+
+S3method(CS, data.frame)
+S3method(CSTable, data.frame)
+S3method(CSInter, data.frame)
+S3method(CC, data.frame)
+S3method(CCTable, data.frame)
+S3method(CCInter, data.frame)

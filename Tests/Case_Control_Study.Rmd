@@ -1,0 +1,254 @@
+---
+title: "Case Control Study"
+author: "Jean Pierre Decorps / Esther Kissling"
+date: "`r Sys.Date()`"
+output: rmarkdown::pdf_document
+geometry: margin=0.5in
+vignette: >
+  %\VignetteIndexEntry{Using EpiStats}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+
+--------------------------------------------------------------------------------------------
+
+
+
+
+\newpage
+# Package Epistats
+
+## Description
+
+The EpiStats package is a set of functions aimed at epidemiologists. They include commands for measures of association and impact for case control studies and cohort studies. They may be particularly useful for outbreak investigations and include univariate and stratified analyses.
+
+The generic function *crossTable* provides a contingency table with optional parameters *percent* and *statistic*
+
+The functions for cohort studies include the *CS*, *CSTable* and *CSInter* commands. 
+
+The functions for case control studies include the *CC*, *CCTable* and *CCInter* commands. 
+
+All variables used need to be numeric binary variables and coded as 0 and 1 or as factors.
+    
+
+## Case control study functions:
+
+The **CC** function provides a 2 by 2 table and measures the association between the outcome and one
+exposure. It includes the odds ratio and its 95% confidence intervals, the attributable fraction among
+the exposed, and a chi square test and its p-value.
+
+The **CCTable** function displays the measures of association between the outcome and a set of
+exposures in a table (odds ratios, confidence intervals and p-values). This helps the researcher to
+compare between exposures and provides a nice table for reports.
+
+The **CCInter** function investigates the effect of a third variable on the association between an
+exposure and the outcome. It presents two by two tables stratified by the levels of a third value. It
+provides the Woolf test for homogeneity between stratum-specific odds ratios. It provides the crude
+odds ratio between an exposure and an outcome and the odds ratio adjusted by the third variable.
+CCInter helps the researcher understand whether a third variable may have an effect modifying or
+confounding effect on the association between an exposure and the outcome.
+
+## The "Tiramisu" dataset
+
+The dataset used in this vignette is from an outbreak investigation carried out in Germany in 1998 by
+Anja Hauri, Robert Koch Institute. It is used in case studies by organisations including EPIET, ECDC
+and EpiConcept.
+
+--------------------------------------------------
+
+  The **CSTable**, **CSInter**, **CCTable** and **CCInter** functions are based on commands written
+  in Stata by *Gilles Desve*, who we gratefully acknowledge.
+
+--------------------------------------------------
+
+\newpage
+# Working with Epistats and "Tiramisu" dataset
+
+## Loading and recoding the dataset
+
+```{r message=FALSE}
+library(EpiStats)
+library(dplyr)
+library(knitr)
+
+options(knitr.kable.NA = '')
+#options(width=200)
+
+data(Tiramisu)
+DF <- Tiramisu
+
+DF <- DF %>%
+  # filter(age != "NA") %>%
+  mutate(agegroup = case_when(age < 30 ~ 0, age >= 30 ~ 1)) %>%
+  mutate(tportion = case_when(tportion == 0 ~ 0, tportion == 1 ~ 1, tportion >= 2 ~ 2)) %>%
+  mutate(tportion = as.factor(tportion)) %>%
+  as.data.frame()
+
+Colnames <- DF %>% 
+  select(-ill, -age, -dateonset, -uniquekey, -tportion, -mportion) %>% 
+  colnames()
+
+```
+
+
+
+
+
+
+
+
+\newpage
+## CC
+
+CC is used for case control studies to determine the association between an exposure and an outcome. Variables need to be binary and coded as "0" and "1". Point estimates and confidence intervals for the odds ratio are calculated along with attributable or preventive fractions for the exposed and total population. Additionally you can select if you want to display the Fisher's exact test, by specifying exact = TRUE.  If you specify full = TRUE you can easily access useful statistics from the output tables.
+
+### Syntax
+
+**CC**(x, cases, exposure, exact, full=FALSE)
+
+\newpage
+### Example 1: CC ill - mousse (unformatted)
+
+```{r}
+cc(DF, "ill", "mousse", exact = TRUE)
+```
+
+\newpage
+### Example 2: CC ill - beer (formatted)
+
+The following results tables are outputs in "markdown" using the kable function.
+
+```{r results='asis'}
+result <- CC(DF, "ill", "beer", exact = TRUE, full = TRUE)
+kable(result$df1, align="r")
+kable(result$df2, align=result$df2.align)
+
+```
+
+By storing the results in the object "result", you are able to use the result tables in Markdown as shown above. By specifying "full = TRUE" you can also easily use individual elements of the results.For example if you would like to view just the odds ratio, you can view it by typing:
+
+```{r}
+result$st$odds_ratio$point_estimate
+```
+
+\newpage
+## CCTable - Summary table for case control studies
+
+  CCTable is used for univariate analysis of case control studies with several exposures. The results are summarised in one table with one row per exposure making comparisons between exposures easier and providing a useful table for integrating into reports. Note that all variables need to be numeric and binary and coded as "0" and "1".
+
+  The results of this function contain: The name of exposure variables, the total 
+  number of cases, the number of exposed cases, the percentage of exposed among cases, the number of controls,
+  the number of exposed controls, the percentage of exposed among controls, odds ratios, 95%CI intervals, p-values. 
+  
+  You can optionally choose to display the Fisher's exact p-value instead of the Chi squared p-value, with the option exact = TRUE.
+  
+  You can specify the sort order, with the option sort="or" to order by odds ratios. The default sort order is by p-values.
+  
+The option "full = TRUE" provides you with useful formatting information, which can be handy if you're using "markdown".
+
+### Syntax
+
+**CCTable**(x, cases, exposure=c(), exact=FALSE, sort = "pvalue", full=FALSE)
+
+### Example 1:  CCTable results ordered by p-value (unformatted)
+
+```{r}
+CCTable(DF, "ill",
+        exposure = c("sex", "agegroup", "tira", "beer", "mousse", "wmousse", "dmousse",
+                     "redjelly", "fruitsalad", "tomato", "mince", "salmon", "horseradish",
+                     "chickenwin", "roastbeef", "pork"))
+```
+
+\newpage
+### Example 2: CCTable results ordered by odds ratio (formatted)
+
+The following results tables are outputs in "markdown" using the kable function.
+
+```{r}
+res = CCTable(DF, "ill", sort = "or", exposure = Colnames)
+kable(res$df)
+```
+
+\newpage
+### Example 3: CCTable results ordered by p-value from the Fisher's exact test (formatted)
+
+The following results tables are outputs in "markdown" using the kable function.
+
+
+```{r}
+res = CCTable(DF, "ill", exposure = Colnames, exact=TRUE)
+kable(res$df)
+```
+
+By storing the results in the object "res", you are able to use the result table in Markdown as shown above. You can also use individual elements of the results. For example if you would like to view just the odds ratio, you can view it by typing (for example):
+
+```{r}
+res$df$`Odds Ratio`[1]
+```
+
+
+\newpage
+## CCInter - Stratified analysis for case control studies
+
+  CCInter is useful to determine the effects of a third variable on the association between an exposure and an outcome.
+  CCInter produces 2 by 2 tables with stratum specific odds ratios, attributable risk among
+  exposed and population attributable risk. 
+  
+  Note that the outcome and exposure variable need to be numeric and binary
+  and coded as "0" and 1". The third variable needs to be numeric, but may have more categories, such as "0", "1" and "2".
+
+  CCInter displays a summary with the crude OR, the Mantel Haenszel adjusted OR and the result of a 
+  Woolf test for homogeneity of stratum-specific OR.
+
+The option "full = TRUE" provides you with useful formatting information, which can be handy if you're using "markdown".
+
+### Syntax
+
+**CCInter** (x, cases, exposure, by, full=FALSE)
+
+
+\newpage
+### Example 1: CCInter ill - wmousse by tira (unformatted)
+
+
+```{r message=FALSE, warning=FALSE}
+
+CCInter(DF, cases="ill", exposure = "wmousse", by = "tira", table = T) 
+```
+
+### Example 2: CCInter ill - beer by tira (formatted) and interaction tables
+
+The following results tables are outputs in "markdown" using the kable function.
+
+```{r message=FALSE, warning=FALSE}
+options(knitr.kable.NA = '')
+res <- CCInter(DF, cases="ill", exposure = "beer", by = "tira", table = TRUE)
+kable(res$df1, align="lccrrrr")
+kable(res$df2, align="lrcc")
+kable(res$df3)
+kable(res$df4)
+
+```
+
+\newpage
+### Example 3: CCInter ill - beer by tportion (formatted)
+
+The following results tables are outputs in "markdown" using the kable function.
+
+```{r message=FALSE}
+
+res <- CCInter(DF, cases="ill", exposure = "beer", by = "tportion", full = TRUE)
+kable(res$df1, align=res$df1.align)
+kable(res$df2, align=res$df2.align)
+
+```
+
+By storing the results in the object "res", you are able to use the result table in Markdown as shown above. You can also use individual elements of the results. For example if you would like to view just the Mantel-Haenszel odds ratio for beer adjusted for tportion, you can view it by typing:
+
+```{r}
+res$df2$Stats[3]
+```
+
+
+

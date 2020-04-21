@@ -1,0 +1,121 @@
+{smcl}
+{* version 1  9Feb2009}{...}
+{cmd:help isoweek}
+{hline}
+
+{title:ISO weeks for dates}
+	
+
+    Calculates the week number of a date, according to the ISO 8601 date and time standard.
+
+	
+
+{title:Syntax}
+
+{p 8 17 2}
+{cmdab:isoweek}
+{bf} datevar {sf}
+[{cmd:,} {it:options}]
+
+{synoptset 30 tabbed}{...}
+{synopthdr}
+{synoptline}
+{syntab:Main}
+{synopt :{opth generate(newvar)}}generate new variables with prefix {it:newvar}{p_end}
+{synopt:}{p_end}
+{synopt:{opt format(dmy|mdy)}}specify format if {bf}datevar{sf} is a string{p_end}
+{synopt:{opt fill}}fill in gaps in sequential weeks{p_end}
+{synopt:{opt nb}}create sequential number representing week in chronological order{p_end}
+{synoptline}
+
+
+{title:Description}
+
+{pstd}
+{cmd:isoweek} helps you obtain the week number of a date, according to the ISO 8601 date and time standard.
+ Default settings give you four variables calculated from the date: {it:_iso}week, {it:_iso}weekyear, {it:_iso}date
+ and {it:_iso}weeklab. Using the {opt gen()} option replaces the {it:_iso} prefix with a user-defined one.
+
+{p 8 8 2}
+{bf} {it:_iso}week {sf} gives you the ISO week number for {bf}datevar{sf}.
+
+{p 8 8 2}
+{bf} {it:_iso}weekyear {sf} gives you the year associated with the ISO week number. This enables you to construct
+a week date if required ({it:_iso}weekyear+{it:_iso}week)
+
+{p 8 8 2}
+{bf} {it:_iso}date {sf} gives you the first date of the ISO week. This is useful in graphs.
+
+{p 8 8 2}
+{bf} {it:_iso}weeklab {sf} gives you a the week number and year as a string variable.
+{p_end}
+{break}
+
+{title:Options for isoweek}
+
+{dlgtab:Options}
+
+{phang}
+{cmd:generate(newvar)}generates a new variable with prefix {it:newvar} and suffix {it:week}, {it:weekyear},
+{it:date} and {it:weeklab}; the default is to have prefix {it:_iso}.
+
+{phang}
+{opt format(dmy|mdy)}}specifies the format if {bf}datevar{sf} is a string variable. You can use {it:dmy} or {it:mdy} to specify 
+the format. {it:dmy} is the default.{p_end}
+
+{phang}
+{opt fill} adds extra records if there is a gap in sequential ISO weeks in the dataset, 
+similiar to {help tsfill:{it:tsfill}}. Filled records will have missing values apart from the generated time variables.
+Only works if the date variable is unique.{p_end}
+
+{phang}
+{opt nb} creates an extra variable with suffix {it:weeknb}, giving you a sequential number, representing the ISO week
+in your dataset. The {it:weeknb} starts at 1 for the earliest ISO week. This variable is useful for time
+ series analysis.{p_end}
+
+{title:Examples}
+
+{phang}{cmd:. isoweek swabdate } {p_end}
+
+{pstd}If using a date variable coded as "mdy", e.g. "06/23/1980"{p_end}
+{phang}{cmd:. isoweek birthdate, format(mdy)} {p_end}
+
+{pstd}Collapsing the dataset into counts of the date of interest and filling any gaps in associated weeks{p_end}
+{phang}{cmd:. collapse (count) id, by(onsetdate)} {p_end}
+{phang}{cmd:. isoweek onsetdate, fill} {p_end}
+
+
+{title:Remarks}
+
+{pstd}
+	For Stata version 8.0 or higher. {p_end}
+{pstd}
+	Adapted by Bernadette Gergonne from a formula developed by Evert van den Heuvel for Excel. {p_end}
+{pstd}
+	http://www.cpearson.com/excel/WeekNumbers.aspx [accessed 20 July 2010] 
+{break}
+	
+{title:Author}
+
+{pstd}	
+	Ado programming by Gilles DESVE {p_end}
+{pstd}
+	EpiConcept {p_end}
+{pstd}
+	In case of any questions please contact (Opinions, comments are welcome as well!):
+	{browse "mailto:g.desve@epiconcept.fr":g.desve@epiconcept.fr}
+
+
+{title:Also see}
+
+{pstd}
+{helpb dates_and_times}
+
+{psee} 
+Manual:  
+
+{psee}
+Online:  
+
+{p 4 6 2} 
+

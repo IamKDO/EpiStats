@@ -1,0 +1,281 @@
+/* 
+  Third version of mygenerate.dlg
+  This version has a tab added for if/in
+*/  
+
+VERSION 9.0
+
+POSITION . . 610 350
+
+DIALOG main, label("esampsi - Epidemio-calculator") tabtitle("Cohort study")
+BEGIN
+
+  CHECKBOX ck_cohort    10  20  120    .,      ///
+           option(cs)                      ///
+           label("Cohort study")       ///
+           onclickon(script main_ck_cohort_on) 
+
+  TEXT     tx_genrr      10  +30   260  .,	label("Minimum risk ratio to detect:")
+  EDIT     ed_genrr      10  +20  120  .,	error("risk ratio") default("2")
+
+  TEXT     tx_genar      10  +30  260  .,	label("Attack rate among non-exposed:")
+  EDIT     ed_genar      10  +20  120  .,	error("Attack rate") 
+  TEXT     tx_genarl     135 @    100  .,   label ("%")
+
+  TEXT     tx_genreu      10  +30   260  .,	label("Ratio of exposed/non-exposed:")
+  EDIT     ed_genreu      10  +20  120  .,	error("ratio E/U") default("1")
+
+  TEXT     tx_gena      10  +30   260  .,	label("Alpha :")
+  EDIT     ed_gena      10  +20  120  .,	error("Alpha") default("0.05")
+
+  TEXT     tx_genp      10  +30   260  .,	label("Power:")
+  EDIT     ed_genp      10  +20  120  .,	error("Power") default("0.80")
+             
+END
+
+
+DIALOG sub, tabtitle("Case-control")
+BEGIN
+
+  CHECKBOX ck_case    10  20  120    .,      ///
+           option(cc)                      ///
+           label("Case Control study")  ///
+           onclickon(script sub_ck_case_on)  
+           
+  TEXT     tx_cca      10  +30   260  .,	label("Minimum odds ratio to detect:")
+  EDIT     ed_cca      10  +20  120  .,	error("odds ratio") default("2")
+
+  TEXT     tx_ccb      10  +30  260  .,	label("% of exposed among controls:")
+  EDIT     ed_ccb      10  +20  120  .,	error("Exposed") 
+  TEXT     tx_ccbl     135 @    100  .,   label ("%")
+
+  TEXT     tx_ccc      10  +30   260  .,	label("Control / Case Ratio:")
+  EDIT     ed_ccc      10  +20  120  .,	error("ratio") default("1")
+
+  TEXT     tx_ccd      10  +30   260  .,	label("Alpha :")
+  EDIT     ed_ccd      10  +20  120  .,	error("Alpha") default("0.05")
+
+  TEXT     tx_cce      10  +30   260  .,	label("Power:")
+  EDIT     ed_cce      10  +20  120  .,	error("Power") default("0.80")
+             
+END
+
+DIALOG pop, tabtitle("Population Survey")
+BEGIN
+
+  CHECKBOX ck_pop    10  20  120    .,      ///
+           option(pop)                      ///
+           label("Population survey")  ///
+           onclickon(script pop_ck_pop_on)  
+           
+  TEXT     tx_psa      10  +30   260  .,	label("Expected prevalence in population :")
+  EDIT     ed_psa      10  +20  120  .,	error("Expected") /// 
+                                        default("50")
+  TEXT     tx_psal     135 @    100  .,   label ("%")
+  
+  TEXT     tx_psb      10  +30  260  .,	label("Absolute precision")
+  EDIT     ed_psb      10  +20  120  .,	error("Precision") default("5")
+  TEXT     tx_psbl     135 @    100  .,   label ("%")
+
+  TEXT     tx_psc      10  +30   260  .,	label("Design effect:")
+  EDIT     ed_psc      10  +20  120  .,	error("design") default("1")
+
+  TEXT     tx_psd      10  +30   260  .,	label("Alpha :")
+  EDIT     ed_psd      10  +20  120  .,	error("Alpha") default("0.05")
+
+//  TEXT     tx_pse      10  +30   260  .,	label("Power:")
+//  EDIT     ed_pse      10  +20  120  .,	error("Power") default("0.80")
+
+  TEXT     tx_pop      10  +30   260  .,	label("Population size:")
+  EDIT     ed_pop      10  +20  120  .,	error("Population") default("999999")
+  
+END
+
+DIALOG power, tabtitle("Power calculation Cohort")
+BEGIN
+
+  CHECKBOX ck_power    10  20  140    .,      ///
+           option(pc)                      ///
+           label("Power calculation Cohort")  ///
+           onclickon(script power_ck_power_on)  
+           
+  TEXT     tx_pca      10  +30   260  .,	label("Risk among exposed:")
+  EDIT     ed_pca      10  +20  120  .,	 error("riskexp") default("50")
+  TEXT     tx_pcal     135 @    100  .,   label ("%")
+
+  TEXT     tx_pcb      10  +30  260  .,	label("Risk among unexposed:")
+  EDIT     ed_pcb      10  +20  120  .,	error("riskunexp") 
+  TEXT     tx_pcbl     135 @    100  .,   label ("%")
+
+//  TEXT     tx_pcc      10  +30   260  .,	label("Unexposed / Exposed Ratio:")
+//  EDIT     ed_pcc      10  +20  120  .,	error("ratioenexp") default("1")
+
+  TEXT     tx_pcd      10  +30   260  .,	label("Number of exposed")
+  EDIT     ed_pcd      10  +20  120  .,	error("exp") 
+
+  TEXT     tx_pce      10  +30   260  .,	label("Number of unexposed")
+  EDIT     ed_pce      10  +20  120  .,	error("unexp") 
+             
+END
+
+DIALOG powercc, tabtitle("Power calculation Case-Control")
+BEGIN
+
+  CHECKBOX ck_powercc    10  20  260    .,      ///
+           label("Power calculation in Case Control ")  ///
+           onclickon(script powercc_ck_powercc_on)  
+           
+  TEXT     tx_pccb      10  +30  260  .,	label("Proportion of controls exposed:")
+  EDIT     ed_pccb      10  +20  120  .,	error("propunexp") default("50")
+  TEXT     tx_pccbl     135 @    100  .,    label ("%")
+
+  CHECKBOX ck_pcca      10  +30   200  .,	/// 
+		label("Proportion of cases exposed:")  ///	
+		option(pcc)                            ///
+        default(1)                             ///
+        onclickon(script powercc_ck_pcca_on)
+  EDIT     ed_pcca      10  +20  120  .,	error("propcaseexp") 
+  TEXT     tx_pccal     135 @    100  .,    label ("%")
+
+  CHECKBOX ck_pccc      210  -20   260  .,	/// 
+        label("Odds Ratio:")     ///
+		option(pcco)                            ///
+        onclickon(script powercc_ck_pccc_on)
+  EDIT     ed_pccc      210  +20  60  .,	error("ratioenexp") 
+
+  TEXT     tx_pccd      10  +30   260  .,	label("Number of cases")
+  EDIT     ed_pccd      10  +20  120  .,	error("exp") 
+
+  TEXT     tx_pcce      10  +30   260  .,	label("Control / case Ratio ")
+  EDIT     ed_pcce      10  +20  120  .,	error("unexp") default("1")
+             
+END
+
+
+SCRIPT powercc_ck_pcca_on
+BEGIN
+    powercc.ed_pcca.enable
+	powercc.ck_pccc.setoff
+    powercc.ed_pccc.setvalue ""
+	powercc.ed_pccc.disable
+END
+
+SCRIPT powercc_ck_pccc_on
+BEGIN
+    powercc.ed_pcca.setvalue ""
+    powercc.ed_pcca.disable
+	powercc.ck_pcca.setoff
+	powercc.ed_pccc.enable
+END
+
+SCRIPT pop_ck_pop_on
+BEGIN
+   main.ck_cohort.setoff
+   sub.ck_case.setoff
+   power.ck_power.setoff
+   powercc.ck_powercc.setoff
+END
+
+
+SCRIPT sub_ck_case_on
+BEGIN
+   main.ck_cohort.setoff
+   pop.ck_pop.setoff
+   power.ck_power.setoff
+   powercc.ck_powercc.setoff
+END
+
+SCRIPT main_ck_cohort_on
+BEGIN
+   sub.ck_case.setoff
+   pop.ck_pop.setoff
+   power.ck_power.setoff
+   powercc.ck_powercc.setoff
+END
+
+SCRIPT power_ck_power_on
+BEGIN
+   sub.ck_case.setoff
+   pop.ck_pop.setoff
+   main.ck_cohort.setoff
+   powercc.ck_powercc.setoff
+END
+
+SCRIPT powercc_ck_powercc_on
+BEGIN
+   sub.ck_case.setoff
+   pop.ck_pop.setoff
+   main.ck_cohort.setoff
+   power.ck_power.setoff
+END
+
+OK ok1,      label("OK")
+CANCEL can1, label("Cancel")
+SUBMIT sub1, label("Submit")
+HELP hlp1,   view("help esampsi")
+RESET res1
+COPY copy1
+
+PROGRAM command
+BEGIN   
+    put "esampsi "
+	if main.ck_cohort {
+    put main.ed_genrr " "
+    put main.ed_genar " "
+    put main.ed_genreu " "
+    put main.ed_gena " "
+    put main.ed_genp " " 
+	beginoptions
+		option main.ck_cohort
+	endoptions
+    }
+	if sub.ck_case {
+    put sub.ed_cca " "
+    put sub.ed_ccb " "
+    put sub.ed_ccc " "
+    put sub.ed_ccd " "
+    put sub.ed_cce " " 
+	beginoptions
+		option sub.ck_case
+	endoptions
+    }
+	if pop.ck_pop {
+    put pop.ed_psa " "
+    put pop.ed_psb " "
+    put pop.ed_psc " "
+    put pop.ed_psd " "
+    // put pop.ed_pse " " 
+	put pop.ed_pop " "
+	beginoptions
+		option pop.ck_pop
+	endoptions
+    }
+	if power.ck_power {
+    put power.ed_pca " "
+    put power.ed_pcb " "
+//    put power.ed_pcc " "
+//    dummy number
+    put "1 "
+    put power.ed_pcd " "
+    put power.ed_pce " " 
+	beginoptions
+		option power.ck_power
+	endoptions
+    }
+	
+	if powercc.ck_powercc {
+    put powercc.ed_pcca " "
+    put powercc.ed_pccb " "
+    put powercc.ed_pccc " "
+//    dummy number
+    put "1 "
+    put powercc.ed_pccd " "
+    put powercc.ed_pcce " " 
+	beginoptions
+		option powercc.ck_pccc
+		option powercc.ck_pcca
+	endoptions
+    }
+	
+END
+

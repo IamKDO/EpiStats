@@ -1,0 +1,661 @@
+{smcl}
+{* 09apr2008}{...}
+{cmd:help mgof}{right: ({browse "http://www.stata-journal.com/article.html?article=st0142":SJ8-2: st0142})}
+{hline}
+
+{title:Title}
+
+{pstd}{hi:mgof} {hline 2} Goodness-of-fit tests for multinomial data
+
+
+{title:Syntax}
+
+{p 8 15 2}
+{cmd:mgof} {varname} [{cmd:=} {it:{help exp}}]
+       {ifin} {weight} [{cmd:,} {it:options}]
+
+{p 8 15 2}
+{cmd:mgofi} {it:f1} {it:f2} ... [ {cmd:/} {it:p1} {it:p2} ... ]
+    [{cmd:,} {it:options}]
+
+
+{synoptset 18 tabbed}{...}
+{synopthdr:options}
+{synoptline}
+{syntab :Method 1}
+{synopt :{opt a:pprox}[{cmd:(}{it:nfif}{cmd:)}]}compute large-sample chi-squared 
+tests; the default
+{p_end}
+{p2coldent:* {cmd:svy}[{cmd:(}{it:spec}{cmd:)}]}adjust tests for survey design
+{p_end}
+{p2coldent:* {opt vce(vcetype)}}adjust tests using {helpb proportion} variance estimate
+{p_end}
+{p2coldent:* {opt cl:uster(varname)}}adjust tests for intragroup correlation
+{p_end}
+{synopt :{opt noi:sily}}show output from {helpb proportion}
+{p_end}
+
+{syntab :Method 2}
+{synopt :{opt mc}}compute Monte Carlo exact tests
+  {p_end}
+{synopt :{opt reps(#)}}number of replications for {cmd:mc}; default is {cmd:reps(10000)}
+  {p_end}
+{synopt :{opt l:evel(#)}}set confidence level for {cmd:mc}; default is {cmd:level(99)}
+  {p_end}
+{synopt :{opt ci:type(type)}}set confidence-interval type
+for {cmd:mc}; default is {cmd:citype(exact)}
+{p_end}
+
+{syntab :Method 3}
+{synopt :{opt ee}}compute exhaustive enumeration exact tests
+  {p_end}
+
+{syntab :Test statistics}
+{synopt :{opt nox:2}}suppress Pearson's chi-squared statistic
+  {p_end}
+{synopt :{opt nolr}}suppress likelihood-ratio statistic
+  {p_end}
+{synopt :{opt cr}[{cmd:(}{it:lambda}{cmd:)}]}include Cressie-Read 
+statistic; {it:lambda} defaults to {cmd:2/3}
+  {p_end}
+{synopt :{opt mlnp}}include outcome probability statistic ({cmd:mc} 
+and {cmd:ee} only)
+  {p_end}
+{synopt :{opt ks:mirnov}}include Kolmogorov-Smirnov statistic ({cmd:mc} 
+and {cmd:ee} only)
+  {p_end}
+
+{syntab :Other options}
+{synopt :{opt f:req}}display frequency table
+  {p_end}
+{synopt :{opt p:ercent}}display frequency table in percentages
+  {p_end}
+{p2coldent:* {opt mat:rix(name)}}provide matrix of observed and expected counts
+  {p_end}
+{synopt :{opt exp:ected(name)}}provide matrix (column vector) containing expected counts
+  {p_end}
+{synopt :{opt nodot:s}}suppress progress dots ({cmd:mc} and {cmd:ee} only)
+  {p_end}
+{synoptline}
+{p 4 6 2}
+* {cmd:svy}, {cmd:vce()}, {cmd:cluster()}, and {cmd:matrix()} are not allowed with {cmd:mgofi}.{p_end}
+{p 4 6 2}
+The full specification for {cmd:svy} is
+    {cmd:svy}[{cmd:(}{it:vcetype}{cmd:,} {it:svy_options}{cmd:)}].{p_end}
+{p 4 6 2}
+{cmd:by} is allowed (unless {cmd:svy} is specified); see {helpb by}.{p_end}
+{p 4 6 2}
+{cmd:fweight}s, {cmd:pweight}s, and {cmd:iweight}s are allowed (see {manhelp weight U:11.1.6 weight}),
+but {cmd:pweight}s are not allowed with {cmd:ee} or {cmd:mc}, and {cmd:iweight}s are not allowed 
+with {cmd:ee} and not allowed with {cmd:mc} if the {cmd:mlnp} 
+option is specified.
+
+
+{title:Description}
+
+{pstd} {cmd:mgof} computes goodness-of-fit tests for the distribution of
+{it:varname}, where {it:varname} is a discrete (categorical, multinomial) variable. The
+default is to perform classical large-sample chi-squared approximation
+tests based on Pearson's chi-squared statistic and the likelihood-ratio 
+statistic. Alternatively, {cmd:mgof} computes exact tests using
+Monte Carlo methods or exhaustive enumeration (see the {cmd:mc} and
+{cmd:ee} options).
+
+{pstd}The (theoretical) null distribution (the distribution against
+which {it:varname} is tested) is specified by {it:{help exp}}. {it:{help exp}}
+is assumed to evaluate to the hypothesized probabilities of the categories of {it:varname}
+or to quantities proportional to these probabilities (e.g., expected counts;
+the scale does not matter). If {it:{help exp}} is omitted, the uniform
+(geometric, equiprobable) distribution is used as the theoretical distribution.
+
+{pstd}
+{cmd:mgofi} is the immediate form of {cmd:mgof} (see {help immed}) where  {it:f1},
+{it:f2}, etc., specify the observed counts and, optionally, {it:p1},
+{it:p2}, etc., specify the theoretical probabilities or expected counts.
+
+
+{title:Options}
+
+{dlgtab:Method 1}
+
+{phang}{opt approx}[{cmd:(}{it:nfit}{cmd:)}], 
+the default method, computes classical large-sample chi-squared approximation
+tests based on Pearson's chi-squared and the likelihood-ratio 
+statistic (see, for example, Horn [1977], Cressie and Read [1989], Sokal and 
+Rohlf [1995, chapter 17]). The degrees of freedom for 
+chi-squared tests are determined as k-{it:nfit}-1, where k is the 
+number of categories, and {it:nfit}, provided by the user, indicates the number 
+of fitted parameters (imposed restrictions) ({it:nfit} defaults to 0). If 
+{cmd:pweight}s are specified, the tests are corrected as outlined in  
+{help mgof##mf:Methods and formulas}. 
+
+{phang}{cmd:svy}[{cmd:(}{it:vcetype} {cmd:,} {it:svy_options}{cmd:)}]
+specifies that the test results be adjusted for
+survey design effects according to the {helpb svyset} 
+specifications. {it:vcetype} and {it:svy_options} are as described in 
+{manhelp svy SVY}. The correction procedure is described in  
+{help mgof##mf:Methods and formulas}. The {cmd:svy} option is not allowed with {cmd:mgofi}.
+
+{phang}{opt vce(vcetype)} specifies that the variance-covariance matrix of the 
+proportions be estimated by using the {helpb proportion} command
+and that the tests be adjusted based on this estimate (see {help mgof##mf:Methods and formulas}
+). {it:vcetype} can be {cmd:analytic}, 
+{bind:{cmd:cluster} {it:clustvar}}, {cmd:bootstrap}, or {cmd:jackknife} 
+(plus possible suboptions as described in
+{bf:{help vce_option:[R] {it:vce_option}}}). {cmd:analytic} 
+and {bind:{cmd:cluster} {it:clustvar}} are not allowed in Stata 9. The
+{cmd:vce()} option is not allowed with {cmd:mgofi}.
+
+{phang}{opt cluster(varname)} is equivalent to Stata 10's 
+{bind:{cmd:vce(cluster} {it:clustvar}{cmd:)}}. The {cmd:cluster()} option is 
+not allowed with {cmd:mgofi}.
+
+{phang}{opt noisily} displays the output from the {helpb proportion} command, 
+which is used to estimate the variances of the proportions if {cmd:svy}, 
+{cmd:vce()}, or {cmd:cluster()} is specified or if {cmd:pweights} are applied.
+
+{dlgtab:Method 2}
+
+{phang}{opt mc} causes the exact p-values to be approximated by sampling 
+from the null distribution (Monte Carlo simulation). The default number 
+of replications for the simulation is
+10,000; see the {opt reps()} option (the same set of samples is used 
+for all test statistics). Confidence intervals of 99% are 
+displayed for the estimated p-values.
+
+{phang}{opt reps(#)} sets the number of replications for the {cmd:mc} method. The 
+default is {cmd:reps(10000)}.
+
+{phang}{opt level(#)} sets the level for the confidence intervals of the
+p-values computed by the {cmd:mc} method. The default is
+{cmd:level(99)}. Unlike many other Stata commands,
+{cmd:mgof} does not depend on {helpb level:set level}.
+
+{phang}{opt citype(type)} specifies how the binomial
+confidence intervals for the p-values from the {cmd:mc} method
+are to be calculated. Available types are {opt exa:ct},
+{opt wa:ld}, {opt w:ilson}, {opt a:gresti}, and
+{opt j:effreys}. See {manhelp ci R}. {cmd:citype(exact)} is the
+default.
+
+{dlgtab:Method 3}
+
+{phang}{opt ee} causes the exact p-values to be computed by cycling through all
+possible data compositions given the sample size and the number of categories. Because
+the number of compositions grows very fast -- it is equal to
+(n+k-1)!/((k-1)!n!), where n is the sample size and
+k is the number of categories -- the {cmd:ee} method is only feasible for
+very small samples and few categories. An important exception 
+is when the null distribution is uniform (and {cmd:ksmirnov} 
+is not specified). In this case, the tests are based
+on enumerating partitions, which are much fewer in number than
+compositions. For example, with n=40 and k=10, 
+the number of compositions is 2,054,455,634, but the number 
+of partitions is only 16,928 (Hirji 1997).
+
+{dlgtab:Test statistics}
+
+{phang}{opt nox2} suppresses Person's chi-squared statistic.
+
+{phang}{opt nolr} suppresses the likelihood-ratio statistic.
+
+{phang}{opt cr}[{cmd:(}{it:lambda}{cmd:)}] specifies that the
+Cressie-Read statistic with parameter {it:lambda} be included (Cressie and Read 
+[1984]; also see Weesie [1997]). The default for {it:lambda} is {cmd:2/3}. 
+
+{phang}{opt mlnp} requests that a test based on the (minus log) multinomial
+probability of the observed outcome be included (see Horn [1977]). {opt mlnp}
+is not allowed with {cmd:approx}.
+
+{phang}{opt ksmirnov} requests that the two-sided Kolmogorov-Smirnov
+statistic be included.  The Kolmogorov-Smirnov statistic is sensitive to
+the order of the categories and should be used only with variables that
+have a natural order (i.e., ordinal or discrete metric data). The
+Kolmogorov-Smirnov test implemented in Stata's {helpb ksmirnov} is conservative
+in the case of discrete data (see, for example, Conover [1972]). The methods 
+implemented here are exact. {opt ksmirnov} is not 
+allowed with {cmd:approx}.
+
+{dlgtab:Other options}
+
+{phang}{opt freq} displays a table containing observed and 
+expected frequencies.
+
+{phang}{opt percent} displays a table containing observed and 
+expected percentages.
+
+{phang}{opt matrix(name)} specifies that the observed and
+expected counts are to be taken from matrix {it:name}
+(see {manhelp matrix P}). The first column of the 
+matrix provides the observed counts and the second column, if present, 
+provides the the expected counts or theoretical probabilities. The uniform 
+distribution is used if the matrix does not contain a second column. Do not 
+provide noninteger observed counts with the {cmd:ee} or {cmd:mc} 
+method. The {cmd:matrix()} option is not allowed with {cmd:mgofi}.
+
+{phang}{opt expected(name)} specifies that the expected 
+counts or theoretical probabilities are to be taken from column vector 
+{it:name} (see {manhelp matrix P}). {cmd:mgof} aborts if the
+number of elements in the vector does not match the number outcomes.
+
+{phang}{opt nodots} suppresses the progress dots for the {cmd:mc} and {cmd:ee} 
+methods. The default is to display a dot per 2% of completed computations. 
+
+{marker mf}
+{title:Methods and formulas}
+
+{pstd}The survey design correction procedure for the large-sample tests
+is based on Rao and Scott (1981) and parallels the default independence-test 
+correction used in {helpb "svy: tabulate twoway"} (see 
+{bf:[SVY] svy: tabulate twoway} and the references therein).
+
+{pstd}Let V/(n-1) be a consistent estimate of the variance-covariance matrix of
+the proportions p_i, i=1...k, where n is the number of observations.
+Furthermore, let v_ij denote an element of V, let m be the number of PSUs
+or clusters, and let L be the number of strata. The correction then assumes
+
+        F  =  X2 / (delta * (a2 + 1)) / d  =  X2 / delta / (k-1)
+        
+{pstd}as asymptotically F(d, d*r) distributed where X2 stands for the
+uncorrected test statistic and where
+
+        delta = 1/(k-1) * sum_i v_ii/p_i
+        
+        d = (k-1) / (1 + a2)
+        
+        a2 = [ 1/(k-1) * sum_ij v_ij^2/(p_i*p_j) ] / delta^2 - 1
+        
+        r = m - L
+        
+{pstd}delta is the mean, and a2 is the squared variation coefficient of the
+"generalized design effects" for the proportions. V/(n-1) is estimated by
+{helpb proportion} taking into account {cmd:pweight}s, clusters, or other
+complex survey design settings.
+
+    
+{title:Examples}
+
+{p 8 8 2}{help mgof##ex1:Approximate chi-squared test}{p_end}
+{p 8 8 2}{help mgof##ex2:Monte Carlo exact test}{p_end}
+{p 8 8 2}{help mgof##ex3:Exhaustive enumeration exact test}{p_end}
+{p 8 8 2}{help mgof##ex4:Kolmogorov-Smirnov test}{p_end}
+{p 8 8 2}{help mgof##ex5:Complex survey design correction}{p_end}
+{p 8 8 2}{help mgof##ex6:Test against non-uniform distribution}{p_end}
+{p 8 8 2}{help mgof##ex7:Using the immediate command or the the matrix() option}{p_end}
+{p 8 8 2}{help mgof##ex8:Empty cells}{p_end}
+
+{marker ex1}{dlgtab:Approximate chi-squared test}
+
+{pstd}A classical chi-squared test against the uniform distribution can be performed as follows:
+
+        {cmd}. drop _all
+        {txt}
+        {cmd}. set seed 38
+        {txt}
+        {cmd}. set obs 20
+        {txt}obs was 0, now 20
+        
+        {cmd}. gen byte x = ceil(uniform()*5)
+        {txt}
+        {cmd}. mgof x, freq cr
+        {res}
+                               {txt}Number of obs ={res}      20
+                               {txt}N of outcomes ={res}       5
+                               {txt}Chi2 df       ={res}       4
+        
+        {txt}{hline 22}{c TT}{hline 23}
+              Goodness-of-fit {c |}       Coef.    P-value
+        {hline 22}{c +}{hline 23}
+                 Pearson's X2 {c |}   {res}       10     0.0404
+         {txt}Log likelihood ratio {c |}   {res}  9.55691     0.0486
+           {txt}Cressie-Read (2/3) {c |}   {res} 9.699921     0.0458
+        {txt}{hline 22}{c BT}{hline 23}
+        
+        {space 0}{space 0}{ralign 12:x}{space 1}{c |}{space 1}{ralign 9:observed}{space 1}{space 1}{ralign 9:expected}{space 1}
+        {space 0}{hline 13}{c   +}{hline 11}{hline 11}
+        {space 0}{space 0}{ralign 12:1}{space 1}{c |}{space 1}{ralign 9:{res:{sf:        3}}}{space 1}{space 1}{ralign 9:{res:{sf:        4}}}{space 1}
+        {space 0}{space 0}{ralign 12:2}{space 1}{c |}{space 1}{ralign 9:{res:{sf:        1}}}{space 1}{space 1}{ralign 9:{res:{sf:        4}}}{space 1}
+        {space 0}{space 0}{ralign 12:3}{space 1}{c |}{space 1}{ralign 9:{res:{sf:        9}}}{space 1}{space 1}{ralign 9:{res:{sf:        4}}}{space 1}
+        {space 0}{space 0}{ralign 12:4}{space 1}{c |}{space 1}{ralign 9:{res:{sf:        2}}}{space 1}{space 1}{ralign 9:{res:{sf:        4}}}{space 1}
+        {space 0}{space 0}{ralign 12:5}{space 1}{c |}{space 1}{ralign 9:{res:{sf:        5}}}{space 1}{space 1}{ralign 9:{res:{sf:        4}}}{space 1}
+        {space 0}{hline 13}{c   +}{hline 11}{hline 11}
+        {space 0}{space 0}{ralign 12:Total}{space 1}{c |}{space 1}{ralign 9:{res:{sf:       20}}}{space 1}{space 1}{ralign 9:{res:{sf:       20}}}{space 1}
+        {txt}
+
+{marker ex2}{dlgtab:Monte Carlo exact test}
+
+{pstd}If the number of observations is low, exact p-values should be 
+computed. One approach is to approximate the exact 
+p-values by sampling from the null distribution ({cmd:mc} method):
+
+        {cmd}. mgof x, mc cr
+        {res}
+        {txt}Percent completed ({res}10000{txt} replications)
+        {txt}0 {hline 5} 20 {hline 6} 40 {hline 6} 60 {hline 6} 80 {hline 5} 100
+        ..................................................
+        
+                                                       Number of obs ={res}      20
+                                                       {txt}N of outcomes ={res}       5
+                                                       {txt}Replications  ={res}   10000
+        
+        {txt}{hline 22}{c TT}{hline 47}
+                              {c |}                  Exact                        
+              Goodness-of-fit {c |}       Coef.    P-value    [99% Conf. Interval]
+        {hline 22}{c +}{hline 47}
+                 Pearson's X2 {c |}   {res}       10     0.0369      0.0322      0.0420
+         {txt}Log likelihood ratio {c |}   {res}  9.55691     0.0753      0.0687      0.0824
+           {txt}Cressie-Read (2/3) {c |}   {res} 9.699921     0.0402      0.0353      0.0455
+        {txt}{hline 22}{c BT}{hline 47}
+        {txt}
+
+{marker ex3}{dlgtab:Exhaustive enumeration exact test}
+
+{pstd} There are (20+5-1)!/((5-1)!20!) = 10,626 different ways in which 20 
+observations can be divided into 5 (or less) categories. Performing an 
+exact test based on generating all these compositions would not be 
+much of a problem. However, because the null distribution is uniform, 
+only 192 partitions, a subset of the 10,626 composition, have to be generated:
+
+        {cmd}. mgof x, ee cr
+        {res}
+        {txt}Percent completed ({res}192{txt} partitions)
+        {txt}0 {hline 5} 20 {hline 6} 40 {hline 6} 60 {hline 6} 80 {hline 5} 100
+        ..................................................
+        
+                               Number of obs ={res}      20
+                               {txt}N of outcomes ={res}       5
+                               {txt}Partitions    ={res}     192
+        
+        {txt}{hline 22}{c TT}{hline 23}
+                              {c |}                  Exact
+              Goodness-of-fit {c |}       Coef.    P-value
+        {hline 22}{c +}{hline 23}
+                 Pearson's X2 {c |}   {res}       10     0.0392
+         {txt}Log likelihood ratio {c |}   {res}  9.55691     0.0773
+           {txt}Cressie-Read (2/3) {c |}   {res} 9.699921     0.0432
+        {txt}{hline 22}{c BT}{hline 23}
+        {txt}
+
+{marker ex4}{dlgtab:Kolmogorov-Smirnov test}
+
+{pstd}The {cmd:ksmirnov} option performs an exact Kolmogorov-Smirnov test for discrete data 
+(not allowed with {cmd:approx}). For example,
+
+        {cmd}. mgof x, ee nox2 nolr ksmirnov
+        {res}
+        {txt}Percent completed ({res}10626{txt} compositions)
+        {txt}0 {hline 5} 20 {hline 6} 40 {hline 6} 60 {hline 6} 80 {hline 5} 100
+        ..................................................
+        
+                               Number of obs ={res}      20
+                               {txt}N of outcomes ={res}       5
+                               {txt}Compositions  ={res}   10626
+        
+        {txt}{hline 22}{c TT}{hline 23}
+                              {c |}                  Exact
+              Goodness-of-fit {c |}       Coef.    P-value
+        {hline 22}{c +}{hline 23}
+         Kolmogorov-Smirnov D {c |}   {res}       .2     0.1656
+        {txt}{hline 22}{c BT}{hline 23}
+        {txt}
+        
+{marker ex5}{dlgtab:Complex survey design correction}
+
+{pstd}{cmd:mgof} may be used with {cmd:pweight}s, in which case the correction 
+outlined in {help mgof##mf:Methods and formulas} is applied:
+
+        {cmd}. gen w = exp(invnorm(uniform()))
+        {txt}
+        {cmd}. mgof x [pw = w]
+        {res}
+                                          {txt}Number of obs ={res}      20
+                                          {txt}N of outcomes ={res}       5
+                                          {txt}F df1         ={res} 3.46153
+                                          {txt}F df2         ={res}  65.769
+        
+        {txt}{hline 22}{c TT}{hline 34}
+              Goodness-of-fit {c |}       Coef.    F-value    P-value
+        {hline 22}{c +}{hline 34}
+                 Pearson's X2 {c |}   {res} 6.867921     1.1741     0.3287
+         {txt}Log likelihood ratio {c |}   {res} 7.946182     1.3584     0.2611
+        {txt}{hline 22}{c BT}{hline 34}{txt}
+
+{pstd}More generally, use the {cmd:svy} option to take account of the complex survey
+design set by {helpb svyset}:
+        
+        {cmd}. svyset [pw = w]
+        
+              {txt}pweight:{col 16}{res}w
+                  {txt}VCE:{col 16}{res}linearized
+          {txt}Single unit:{col 16}{res}missing
+             {txt}Strata 1:{col 16}<one>
+                 SU 1:{col 16}<observations>
+                FPC 1:{col 16}<zero>
+        {p2colreset}{...}
+        
+        {cmd}. mgof x, svy
+        {res}
+        {txt}Number of strata ={res}       1        {txt}Number of obs ={res}      20
+        {txt}Number of PSUs   ={res}      20        {txt}Pop size      ={res}  35.039
+                                          {txt}Design df     ={res}      19
+                                          {txt}N of outcomes ={res}       5
+                                          {txt}F df1         ={res} 3.46153
+                                          {txt}F df2         ={res}  65.769
+        
+        {txt}{hline 22}{c TT}{hline 34}
+              Goodness-of-fit {c |}       Coef.    F-value    P-value
+        {hline 22}{c +}{hline 34}
+                 Pearson's X2 {c |}   {res} 6.867921     1.1741     0.3287
+         {txt}Log likelihood ratio {c |}   {res} 7.946182     1.3584     0.2611
+        {txt}{hline 22}{c BT}{hline 34}
+        {txt}
+
+{marker ex6}{dlgtab:Test against nonuniform distribution}
+
+        {cmd}. recode x (1=0.1) (2=0.2) (3=0.4) (4=0.2) (5=0.1), generate(p)
+        {txt}(20 differences between x and p)
+        
+        {cmd}. mgof x = p, freq ee nodots
+        {res}
+                               {txt}Number of obs ={res}      20
+                               {txt}N of outcomes ={res}       5
+                               {txt}Compositions  ={res}   10626
+        
+        {txt}{hline 22}{c TT}{hline 23}
+                              {c |}                  Exact
+              Goodness-of-fit {c |}       Coef.    P-value
+        {hline 22}{c +}{hline 23}
+                 Pearson's X2 {c |}   {res}    8.375     0.0762
+         {txt}Log likelihood ratio {c |}   {res} 8.170615     0.1115
+        {txt}{hline 22}{c BT}{hline 23}
+        
+        {space 0}{space 0}{ralign 12:x}{space 1}{c |}{space 1}{ralign 9:observed}{space 1}{space 1}{ralign 9:expected}{space 1}
+        {space 0}{hline 13}{c   +}{hline 11}{hline 11}
+        {space 0}{space 0}{ralign 12:1}{space 1}{c |}{space 1}{ralign 9:{res:{sf:        3}}}{space 1}{space 1}{ralign 9:{res:{sf:        2}}}{space 1}
+        {space 0}{space 0}{ralign 12:2}{space 1}{c |}{space 1}{ralign 9:{res:{sf:        1}}}{space 1}{space 1}{ralign 9:{res:{sf:        4}}}{space 1}
+        {space 0}{space 0}{ralign 12:3}{space 1}{c |}{space 1}{ralign 9:{res:{sf:        9}}}{space 1}{space 1}{ralign 9:{res:{sf:        8}}}{space 1}
+        {space 0}{space 0}{ralign 12:4}{space 1}{c |}{space 1}{ralign 9:{res:{sf:        2}}}{space 1}{space 1}{ralign 9:{res:{sf:        4}}}{space 1}
+        {space 0}{space 0}{ralign 12:5}{space 1}{c |}{space 1}{ralign 9:{res:{sf:        5}}}{space 1}{space 1}{ralign 9:{res:{sf:        2}}}{space 1}
+        {space 0}{hline 13}{c   +}{hline 11}{hline 11}
+        {space 0}{space 0}{ralign 12:Total}{space 1}{c |}{space 1}{ralign 9:{res:{sf:       20}}}{space 1}{space 1}{ralign 9:{res:{sf:       20}}}{space 1}
+        {txt}
+
+{marker ex7}{dlgtab:Using the immediate command or the the matrix() option}
+
+        {cmd}. mgofi 3 1 9 2 5 / 2 4 8 4 2, ee nodots
+        {res}
+                               {txt}Number of obs ={res}      20
+                               {txt}N of outcomes ={res}       5
+                               {txt}Compositions  ={res}   10626
+        
+        {txt}{hline 22}{c TT}{hline 23}
+                              {c |}                  Exact
+              Goodness-of-fit {c |}       Coef.    P-value
+        {hline 22}{c +}{hline 23}
+                 Pearson's X2 {c |}   {res}    8.375     0.0762
+         {txt}Log likelihood ratio {c |}   {res} 8.170615     0.1115
+        {txt}{hline 22}{c BT}{hline 23}
+        
+        {cmd}. matrix A = (3\1\9\2\5),(2\4\8\4\2)
+        {txt}
+        {cmd}. mgof, matrix(A) ee nodots
+        {res}
+                               {txt}Number of obs ={res}      20
+                               {txt}N of outcomes ={res}       5
+                               {txt}Compositions  ={res}   10626
+        
+        {txt}{hline 22}{c TT}{hline 23}
+                              {c |}                  Exact
+              Goodness-of-fit {c |}       Coef.    P-value
+        {hline 22}{c +}{hline 23}
+                 Pearson's X2 {c |}   {res}    8.375     0.0762
+         {txt}Log likelihood ratio {c |}   {res} 8.170615     0.1115
+        {txt}{hline 22}{c BT}{hline 23}
+        {txt}
+
+{marker ex8}{dlgtab:Empty cells}
+
+{pstd}Empty cells can be introduced by adding observations with 0 weights
+(or by using {cmd:mgofi} or the {cmd:matrix()} option):
+
+        {cmd}. gen w = 1
+        {txt}
+        {cmd}. set obs 21
+        {txt}obs was 20, now 21
+        
+        {cmd}. replace x = 6 in 21
+        {txt}(1 real change made)
+        
+        {cmd}. replace w = 0 in 21
+        {txt}(1 real change made)
+        
+        {cmd}. mgof x [fw = w], freq ee nodots
+        {res}
+                               {txt}Number of obs ={res}      20
+                               {txt}N of outcomes ={res}       6
+                               {txt}Partitions    ={res}     282
+        
+        {txt}{hline 22}{c TT}{hline 23}
+                              {c |}                  Exact
+              Goodness-of-fit {c |}       Coef.    P-value
+        {hline 22}{c +}{hline 23}
+                 Pearson's X2 {c |}   {res}       16     0.0071
+         {txt}Log likelihood ratio {c |}   {res} 16.84977     0.0083
+        {txt}{hline 22}{c BT}{hline 23}
+        
+        {space 0}{space 0}{ralign 12:x}{space 1}{c |}{space 1}{ralign 9:observed}{space 1}{space 1}{ralign 9:expected}{space 1}
+        {space 0}{hline 13}{c   +}{hline 11}{hline 11}
+        {space 0}{space 0}{ralign 12:1}{space 1}{c |}{space 1}{ralign 9:{res:{sf:        3}}}{space 1}{space 1}{ralign 9:{res:{sf: 3.333333}}}{space 1}
+        {space 0}{space 0}{ralign 12:2}{space 1}{c |}{space 1}{ralign 9:{res:{sf:        1}}}{space 1}{space 1}{ralign 9:{res:{sf: 3.333333}}}{space 1}
+        {space 0}{space 0}{ralign 12:3}{space 1}{c |}{space 1}{ralign 9:{res:{sf:        9}}}{space 1}{space 1}{ralign 9:{res:{sf: 3.333333}}}{space 1}
+        {space 0}{space 0}{ralign 12:4}{space 1}{c |}{space 1}{ralign 9:{res:{sf:        2}}}{space 1}{space 1}{ralign 9:{res:{sf: 3.333333}}}{space 1}
+        {space 0}{space 0}{ralign 12:5}{space 1}{c |}{space 1}{ralign 9:{res:{sf:        5}}}{space 1}{space 1}{ralign 9:{res:{sf: 3.333333}}}{space 1}
+        {space 0}{space 0}{ralign 12:6}{space 1}{c |}{space 1}{ralign 9:{res:{sf:        0}}}{space 1}{space 1}{ralign 9:{res:{sf: 3.333333}}}{space 1}
+        {space 0}{hline 13}{c   +}{hline 11}{hline 11}
+        {space 0}{space 0}{ralign 12:Total}{space 1}{c |}{space 1}{ralign 9:{res:{sf:       20}}}{space 1}{space 1}{ralign 9:{res:{sf:       20}}}{space 1}
+        {txt}
+
+{title:Saved results}
+
+{pstd}Depending on options, {cmd:mgof} saves the following in {cmd:r()}:
+
+{pstd}Scalars{p_end}
+{p2colset 7 23 24 2}{...}
+{p2col : {cmd:r(N)}}             number of observations{p_end}
+{p2col : {cmd:r(N_pop)}}         population size{p_end}
+{p2col : {cmd:r(N_strata)}}      number of strata{p_end}
+{p2col : {cmd:r(N_psu)}}         number of PSUs{p_end}
+{p2col : {cmd:r(N_clust)}}       number of clusters{p_end}
+{p2col : {cmd:r(df_r)}}          design degrees of freedom{p_end}
+{p2col : {cmd:r(df)}}            degrees of freedom for the chi-squared statistics{p_end}
+{p2col : {cmd:r(df1)}}           numerator d.f. for the F statistics{p_end}
+{p2col : {cmd:r(df2)}}           denominator d.f. for the F statistics{p_end}
+{p2col : {cmd:r(delta)}}         mean generalized design effect{p_end}
+{p2col : {cmd:r(a2)}}            squared variation coefficient of generalized design effects{p_end}
+{p2col : {cmd:r(reps)}}          number of replications{p_end}
+{p2col : {cmd:r(partitions)}}    number of partitions{p_end}
+{p2col : {cmd:r(compositions)}}  number of compositions{p_end}
+{p2col : {cmd:r(}{it:stat}{cmd:)}}      value of test statistic{p_end}
+{p2col : {cmd:r(F_}{it:stat}{cmd:)}}      value of the corrected F statistic{p_end}
+{p2col : {cmd:r(p_}{it:stat}{cmd:)}}    p-value of {cmd:r(}{it:stat}{cmd:)} or {cmd:r(F_}{it:stat}{cmd:)} {p_end}
+{p2col : {cmd:r(p_}{it:stat}{cmd:_srs)}}    uncorrected p-value of {cmd:r(}{it:stat}{cmd:)}{p_end}
+{p2col : {cmd:r(p_}{it:stat}{cmd:_lb)}} lower bound of confidence interval for {cmd:r(p_}{it:stat}{cmd:)}{p_end}
+{p2col : {cmd:r(p_}{it:stat}{cmd:_ub)}} upper bound of confidence interval for {cmd:r(p_}{it:stat}{cmd:)}{p_end}
+
+{p 23 23 2}where {it:stat} is:{p_end}
+{p 23 23 2}{cmd:x2} (Pearson's chi-squared){p_end}
+{p 23 23 2}{cmd:lr} (likelihood ratio){p_end}
+{p 23 23 2}{cmd:cr} (Cressie-Read statistic){p_end}
+{p 23 23 2}{cmd:mlnp} (minus log outcome probability){p_end}
+{p 23 23 2}{cmd:ksmirnov} (Kolmogorov-Smirnov D){p_end}
+
+{pstd} Macros{p_end}
+{p2col : {cmd:r(depvar)}} name of tabulated variable{p_end}
+{p2col : {cmd:r(h0)}} definition of the theoretical distribution; either
+{cmd:"= }{it:exp}{cmd:"} or {cmd:"= 1/}{it:k}{cmd:"}, depending on whether
+{it:exp} was specified, where {it:k} is the number of categories{p_end}
+{p2col : {cmd:r(method)}} method used to compute the p-values{p_end}
+{p2col : {cmd:r(stats)}} list of tested statistics{p_end}
+{p2col : {cmd:r(lambda)}} lambda parameter of the Cressie-Read statistic{p_end}
+{p2col : {cmd:r(citype)}} Monte Carlo confidence interval type {p_end}
+{p2col : {cmd:r(cilevel)}} Monte Carlo confidence level{p_end}
+
+{pstd} Matrices{p_end}
+{p2col : {cmd:r(count)}} observed counts and expected counts{p_end}
+
+
+{title:References}
+
+{phang} Conover, W. J. 1972. A Kolmogorov goodness-of-fit test for
+discontinuous distributions.
+{it:Journal of the American Statistical Association} 67: 591-596.
+
+{phang}Cressie, N., and T. R. C. Read. 1984. Multinomial goodness-of-fit tests.
+{it:Journal of the Royal Statistical Society Series B (Methodological)} 46:
+440-464.
+
+{phang}{hline 8}. 1989. Pearson's X^2 and the loglikelihood ratio statistic
+G^2: A comparative review. {it:International Statistical Review} 57: 19-43.
+
+{phang}Hirji, K. F. 1997. A comparison of algorithms for exact goodness-of-fit
+tests for multinomial data.
+{it:Communications in Statistics-Simulation and Computation} 26: 1197-1227.
+
+{phang}Horn, S. D. 1977. Goodness-of-fit tests for discrete data: A review and
+an application to a health impairment scale. {it:Biometrics} 33: 237-247.
+
+{phang}Rao, J. N. K., and A. J. Scott. 1981. The analysis of categorical data
+from complex sample surveys: Chi-squared tests for goodness of fit and
+independence in two-way tables.
+{it:Journal of the American Statistical Association} 76: 221-230.  {p_end}
+
+{phang}Sokal, R. R., and F. J. Rohlf. 1995.
+{it:Biometry}. 3rd ed. New York: Freeman.
+
+{phang}Weesie, J. 1997. sg68: Goodness-of-fit statistics for multinomial
+distributions. {it:Stata Technical Bulletin} 36: 26-28. Reprinted in
+{it:Stata Technical Bulletin Reprints}, vol. 6, 183-186. College Station, TX:
+Stata Press.
+  
+
+{title:Author}
+
+{pstd} Ben Jann, ETH Zurich, jann@soz.gess.ethz.ch
+
+
+{title:Also see}
+
+{psee}
+Article: {it:Stata Journal}, volume 8, number 2: {browse "http://www.stata-journal.com/article.html?article=st0142":st0142}
+
+{psee} Online:  {manhelp ksmirnov R}, {manhelp matrix P},
+                {helpb "svy: tabulate twoway":[SVY] svy: tabulate twoway},
+                {manhelp proportion R}
+
+{psee} User packages:{p_end}
+
+             {bf:{net "describe tab_chi, from(http://fmwww.bc.edu/RePEc/bocode/t)":tabchi}}  by Nicholas J. Cox
+             {bf:{net "describe multgof, from(http://www.fss.uu.nl/soc/iscore/stata)":multgof}} by Jeroen Weesie
+             {bf:{net "describe chi2fit, from(http://web.missouri.edu/~kolenikovs/stata)":chi2fit}} by Stas Kolenikov
+             {bf:{net "describe csgof, from(http://www.ats.ucla.edu/stat/stata/ado/analysis)":csgof}}   by Michael N. Mitchell
+

@@ -1,0 +1,45 @@
+---
+title: "Untitled"
+author: "Jean Pierre Decrorps"
+date: "5 octobre 2017"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(EpiStats)
+library(dplyr)
+library(knitr)
+
+```
+
+# Bigdata
+
+```{r}
+DF <- read.csv("asthma_gender.csv") %>%
+  mutate(gender1 = as.numeric(gender1)) %>%
+  mutate(asthma = as.numeric(asthma)) %>%
+  as.data.frame()
+
+```
+
+```{r}
+r <- CS(DF, "asthma", exposure = "gender1")
+kable(r$DF1)
+
+r <- CSTable(DF, "asthma", exposure = c("gender1", "cough", "sorethroat"))
+kable(r$df)
+
+r <- CC(DF, "asthma", exposure = "gender1")
+kable(r$DF1)
+
+r <- CCInter(DF, "asthma", "gender1", "cough")
+kable(r$df1)
+kable(r$df2)
+
+r <- CSInter(DF, "asthma", "gender1", "cough")
+kable(r$df1)
+kable(r$df2)
+
+```
+

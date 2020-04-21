@@ -1,0 +1,93 @@
+{smcl}
+{* 13may2008}{...}
+{cmd:help shp2dta}
+{hline}
+
+{title:Title}
+
+{p2colset 5 17 36 2}{...}
+{p2col :{hi:shp2dta} {hline 2}}Converts shape boundary files to Stata
+datasets{p_end} {p2colreset}{...}
+
+
+{title:Syntax}
+
+{p 8 15 2}
+{cmd :shp2dta} {helpb using} {it:shpfilename} {cmd:,} {opt data:base(filename)}
+{opt coor:dinates(filename)} 
+[{opt replace} 
+{opt genid(newvarname)}
+{opt genc:entroids(stub)}]
+
+{synoptset 25 tabbed}{...}
+{synopthdr}
+{synoptline}
+{syntab :Main}
+{synopt :{opt data:base(filename)}}Specifies filename of new database 
+dataset{p_end}
+{synopt :{opt coor:dinates(filename)}}Specifies filename of new coordinates 
+dataset{p_end}
+{synopt :{opt replace}}Overwrites existing database and coordinates 
+filenames{p_end}
+{synopt :{opt genid(newvarname)}}Creates unique {it:id} variable for 
+{it:database}.dta{p_end}
+{synopt :{opt genc:entroids(stub)}}Creates centroid variables{p_end}
+{synoptline}
+
+{p2colreset}{...}
+{p 4 6 2}
+If {it:shpfilename} is specified without an extension, {cmd:.shp} 
+is assumed.{p_end}
+{p 4 6 2}
+If {it:filename} is specified without an extension, {cmd:.dta} is assumed.
+{p_end}
+{p 4 6 2}
+Windows and Macintosh users:  if {it:shpfilename} or {it:filename} contains
+embedded spaces, remember to enclose them in double quotes.{p_end}
+
+{title:Description}
+
+{pstd}
+{cmd:shp2dta} reads a shape (.shp) and dbase (.dbf) file from disk and converts
+them into Stata datasets.  The shape and dbase files must have the same name
+and be saved in the same directory.  The user-written command {cmd:tmap} can
+use the two datasets that {cmd:shp2dta} creates.  {cmd: shp2dta} can convert
+only point, line, and polygon shapefiles (type 1, 3, and 5).
+
+{title:Options}
+
+{dlgtab:Main}
+
+{phang}{opt database(filename)} specifies the name of the new Stata dataset
+to contain the .dbf file data.
+
+{phang}{opt coordinates(filename)} specifies the name of the new Stata dataset
+to contain the .shp file data.
+
+{phang}{opt replace} overwrites any existing Stata dataset with the names
+specified in the {opt database(filename)} and {opt coordinates(filename)} 
+options.
+
+{phang}{opt genid(newvarname)} specifies the name of the new numeric variable
+that, in file {it:database}.dta, will uniquely identify the different
+geographical areas of interest.  The values taken on by {it:newvarname} will
+correspond to the values taken on by variable _ID in file {it:coordinates}.dta.
+
+{phang}{opt gencentroids(stub)} requests that the coordinates of the centroids 
+of the geographical areas of interest be computed, stored in variables 
+x_{it:stub} and y_{it:stub}, and added to file {it:database}.dta.  You must
+also specify the {opt genid(newvarname)} option.
+
+
+
+
+{title:Examples:}
+
+{phang}{cmd:. shp2dta using asia, data("C:\mydata-d.dta") }
+{cmd:coor("C:\mycoor-c.dta")}{p_end}
+
+{title:Author}
+
+{p 4} Kevin Crow {p_end}
+{p 4} StataCorp L.P. {p_end}
+{p 4} kcrow@stata.com {p_end}

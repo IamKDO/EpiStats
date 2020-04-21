@@ -1,0 +1,31 @@
+
+VERSION 9.0
+
+POSITION . . 610 350
+
+
+DIALOG coordo,  tabtitle("Coordinates variable for points map")
+BEGIN
+
+  TEXT tx_xcoor2       10  30  260  .,	label("Variable for X coordinate of points")
+  VARNAME vn_xcoor2    10 +20  130  .,	label("") ///
+                                        option(xcoor)       
+
+  TEXT tx_ycoor2        10 +30  260  .,	label("Variable for Y coordinate of points")
+  VARNAME vn_ycoor2    10 +20  130  .,	label("") ///
+										option(ycoor)																	
+
+END
+
+
+OK ok1,      label("OK")
+CANCEL can1, label("Cancel")
+HELP hlp1,   view("help emap")
+RESET res1
+
+
+PROGRAM command
+BEGIN
+    put coordo.vn_xcoor2
+    call coordo.vn_ycoor2.withvalue PARENT.callthru `"spmapresult2.setstring "@""'
+END

@@ -1,0 +1,91 @@
+{smcl}
+{* 05jan2009}{...}
+{cmd:help mtable}
+{hline}
+
+{title:Tools for Epidemiology}
+
+ mtable.ado, for Stata version 9.0 or higher
+ January 2009
+
+ {pstd}
+ Matched analysis, displaying tables for discordant/concordant pairs.
+ {p_end}
+ {pstd}
+ Display a comprehensive summary with Odds ratio and Mac Nemars chi2.
+{p_end}
+
+
+ Developped by Gilles Desve .
+ Special thanks to Alain Moren and Esther Kissling. 
+ In case of any question please contact us: 
+ g.desve@epiconcept.fr
+  (Opinions, notices are welcome as well!)
+
+
+{title:OR and chi2 for Matched analysis}
+
+
+{title:Syntax}
+
+{p 8 17 2}
+{cmdab:mtable}
+[{varlist}]
+{ifin}
+{cmd:,} {it:options}
+
+{synoptset 20 tabbed}{...}
+{synopthdr}
+{synoptline}
+{syntab:Main}
+{synopt:{opth by(varname)}}Select the variable used for stratum. Could not be omited{p_end}
+{synoptline}
+{p2colreset}{...}
+{p 4 6 2}
+{cmd:by} may not be used with {cmd:mtable}.{p_end}
+
+
+{title:Description}
+
+{pstd}
+{cmd:mtable} is used with matched case-control data.  It calculates McNemar's chi-squared; point estimates and
+    confidence intervals for the odds ratio. {cmd:mtable} could be used for any number of control per case.
+
+
+{pstd}
+Result could be copied with "copy table" in order to be pasted in Excel.  
+
+{title:Options}
+
+{dlgtab:Main}
+
+{phang}
+{cmd:by} Varaible which uniquely identify each groupe of case and associated controls. 
+These variable could be of any type. 
+
+{title:Remarks}
+{pstd}
+As with the {helpb cc} command, variables used with {cmd:mtable} must be coded as 0/1. {p_end}
+{pstd}
+For detailed information contact g.desve@epiconcept.fr 
+{p_end}
+
+{title:Examples}
+
+{phang}{cmd:. mtable ill mousse, by(id)} {p_end}
+{p 4 6 2} 
+Matched analysis using id as pair identifier 
+{p_end}
+
+
+{title:Also see}
+{helpb mcci}, {helpb clogit}.
+
+{psee}
+Manual:  
+
+{psee}
+Online:  
+
+{p 4 6 2} 
+

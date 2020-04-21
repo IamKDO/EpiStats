@@ -1,0 +1,75 @@
+---
+title: "CCInter"
+author: "Jean Pierre Decrorps"
+date: "18 septembre 2017"
+output:
+  html_document: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+-------------------------------------------------------------------------------------------
+
+# CCInter - Summary table for cohort study
+
+CCInter produces 2 by 2 tables with stratum specific odds ratios, attributable risk among
+exposed and population attributable risk.
+
+Displays a summary with the crude OR, the Mantel Haenszel adjusted OR and the result of a Woolf test for homogeneity.
+
+Also computes additive interaction (biological interaction)
+
+```{r echo=FALSE, message=FALSE}
+library(EpiStats)
+library(knitr)
+library(dplyr)
+```
+
+# Function CCInter
+
+```{r}
+data(Tiramisu)
+DF <- Tiramisu
+```
+
+## Recoding
+
+```{r}
+DF <- DF %>%
+  mutate(age = case_when(age < 30 ~ 0, age >= 30 ~ 1)) %>%
+  rename(agegroup = age) %>%
+  mutate(tportion = case_when(tportion == 0 ~ 0, tportion == 1 ~ 1, tportion >= 2 ~ 2)) %>%
+  mutate(tportion = as.factor(tportion)) %>%
+  as.data.frame()
+
+```
+
+\newpage
+## CCInter ill / wmousse by tira
+
+```{r}
+options(knitr.kable.NA = '')
+
+res <- CCInter(DF, cases="ill", exposure = "wmousse", by = "tira")
+kable(res$df1, align=res$df1.align, digits = res$df1.digits)
+kable(res$df2, digits = res$df2.digits)
+
+```
+
+
+\newpage
+## CCInter ill / beer by tira
+
+```{r}
+options(knitr.kable.NA = '')
+
+CCInter(DF, cases="ill", exposure = "beer", by = "tira", table = TRUE)
+
+res <- CCInter(DF, cases="ill", exposure = "beer", by = "tira")
+kable(res$df1, align=res$df1.align, digits = res$df1.digits)
+kable(res$df2, digits = res$df2.digits)
+
+```
+

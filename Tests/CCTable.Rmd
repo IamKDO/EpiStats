@@ -1,0 +1,84 @@
+---
+title: "CCTable"
+author: "Jean Pierre Decrorps"
+date: "14 septembre 2017"
+output:
+  pdf_document: default
+  html_document: default
+geometry: left=2cm,right=2cm,top=2cm,bottom=2cm
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+# CCTable
+
+    Univariate case control analysis for each exposure, results are
+    summarized into one table. One row, one exposure.
+ 
+    Result file contains: ordering number of exposure(id), name of variable
+    (exposure), total number of cases, number of exposed cases, percentage of
+    exposed among cases, number of controls, number of exposed controls,
+    percentage of exposed among controls, odds ratio, 95%CI interval, 95%
+    p-value.
+
+
+
+
+```{r echo=FALSE, message=FALSE}
+library(EpiStats)
+library(knitr)
+library(dplyr)
+```
+
+# Function CCTable
+
+
+```{r}
+data(Tiramitsu)
+DF <- Tiramitsu
+#kable(str(DF))
+```
+
+## Recoding
+
+```{r}
+DF <- DF %>%
+  mutate(age = case_when(age < 30 ~ 0, age >= 30 ~ 1)) %>%
+  rename(agegroup = age) %>%
+  mutate(tportion = case_when(tportion == 0 ~ 0, tportion == 1 ~ 1, tportion >= 2 ~ 2)) %>%
+  as.data.frame()
+
+Colnames <- DF %>% select(-ill, -dateonset, -uniquekey, -tportion, -mportion) %>% colnames()
+Colnames
+```
+
+## RAW result unordered
+```{r}
+CCTable(DF,
+        "ill",
+        exposure = c("sex", "agegroup", "tira", "beer", "mousse", "wmousse", "dmousse", "redjelly",
+                        "fruitsalad", "tomato", "mince", "salmon", "horseradish",
+                        "chickenwin", "roastbeef", "pork"))
+```
+
+\newpage
+## Formated result ordered by Odds Ratio
+```{r}
+res = CCTable(DF,
+        "ill",
+        sort = "or",
+        exposure = Colnames)
+kable(res$df, digits=res$digits)
+```
+
+\newpage
+## Formated result ordered by p.value from Fisher test.
+```{r}
+res = CCTable(DF,
+        "ill",
+        exact = TRUE,
+        exposure = Colnames)
+kable(res$df, digits=res$digits)
+```
+

@@ -1,0 +1,46 @@
+---
+title: "regLog"
+author: "Jean Pierre Decrorps"
+date: '`r Sys.Date()`'
+output:
+  pdf_document: default
+  html_document: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# regLog
+
+Computes a Logistic Regression (Logit).
+
+
+```{r echo=FALSE, message=FALSE}
+library(EpiStats)
+library(knitr)
+library(ggfortify)
+```
+
+
+```{r  echo=FALSE}
+data(Tiramisu)
+DF <- Tiramisu
+vars <- c("ill","tira", "wmousse", "dmousse", "mousse", "beer")
+DF$ill <- factor(DF$ill, levels=c(1,0), ordered = TRUE)
+# DF$sex <- factor(DF$sex, levels = c("males", "females"), ordered = TRUE)
+#kable(str(DF))
+```
+
+\newpage
+## regLog ill ~ill tira+wmousse+dmousse+mousse+beer
+
+```{r}
+reg <- regLog(DF, ill, "tira+wmousse+dmousse+mousse+beer")
+
+
+```
+
+
+
+
